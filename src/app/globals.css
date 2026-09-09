@@ -1,26 +1,36 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --color-background: #F9F7F4;
+  --color-surface: #FFFFFF;
+  --color-surface-elevated: #F3F0EB;
+  --color-text-primary: #1C1C1C;
+  --color-text-secondary: #6B6560;
+  --color-text-tertiary: #9C958D;
+  --color-accent: #C6B8A4;
+  --color-accent-hover: #B8A892;
+  --color-accent-muted: #EDE6DC;
+  --color-border: #E8E2DA;
+  --color-success: #8A9A7B;
+  --color-warning: #C4A484;
+  --color-error: #B87A7A;
+  --color-overlay: rgba(28, 28, 28, 0.4);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+video {
+  object-fit: cover;
 }

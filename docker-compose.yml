@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: deuxly-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: deuxly
+      POSTGRES_PASSWORD: deuxly
+      POSTGRES_DB: deuxly
+    ports:
+      - "55432:5432"
+    volumes:
+      - deuxly_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U deuxly -d deuxly"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  deuxly_pgdata:
