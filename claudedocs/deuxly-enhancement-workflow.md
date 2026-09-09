@@ -93,6 +93,18 @@ Branch: `feat/phase-1-foundation`. No behavior/feature additions — correctness
 
 Branch: `feat/phase-2-analysis`. Depends on Phase 1 merged.
 
+**Status (2026-09-08): COMPLETE — pending review/merge.**
+- P2.1 ✅ `src/lib/faceLandmarks.ts` — MediaPipe FaceMesh (tfjs runtime) loaded from **CDN at runtime** (jsdelivr), not bundled. `@tensorflow/tfjs`, `@tensorflow-models/face-landmarks-detection`, `@mediapipe/face_mesh` removed from deps — their UMD bundles broke Turbopack (`@mediapipe/face_mesh` has no ESM exports) and the model weights download over the network anyway. `detectLandmarks()` + `faceFrame()` anchor frame (eye-midpoint origin, inter-ocular unit, +y toward chin). Old `faceDetection.ts` placeholder deleted.
+- P2.2 ✅ `CameraCapture.tsx` — replaced the Chrome-only `window.FaceDetector` path with the FaceMesh detector on the live video (throttled ~180ms, in-flight guard, disables after repeated failures → manual capture fallback). Distance from box ratio, centring from box x-bounds.
+- P2.3 ✅ `src/lib/align.ts` — Umeyama similarity transform (`estimateSimilarity`) from eye/nose/chin anchors, residual, per-channel `channelStats` + `matchExposure` to neutralise lighting/white-balance drift.
+- P2.4 ✅ `src/lib/zones.ts` (face-anchored zone rectangles → image polygons, point-in-polygon) + `src/lib/metrics.ts` (`zoneMetric`: mean luma, gradient-magnitude texture, redness; `compareZone`: lower texture/redness = improved, big residual brightness delta → neutral + low confidence).
+- P2.5 ✅ `src/lib/compareImages.ts` client orchestrator (rasterise→detect→register→exposure-match→sample→compare), runs in the browser. `src/lib/analysis.ts` — `Math.random()` gone; `buildAnalysisResult()` from real comparisons + `validateAnalysisResult()` (server-side shape/range guard). `POST /api/compare` now accepts `{ photoAId, photoBId, result }`, validates, persists. `compare/page.tsx` runs the pipeline client-side, POSTs the result, handles `analyzing` / `no-face` / `error` states. `VisualOverlay.tsx` draws real landmark polygons over the baseline photo.
+- P2.6 ✅ `AnalysisSummary.tsx` — per-zone **diverging bar** (improved right / worsened left, length = confidence, glyph + word so it is not colour-alone) via `dataviz` skill guidance; brand sage/rose diverging pair + warm-gray midpoint.
+- P2.7 ✅ 33 unit tests (align maths recover a known transform; metrics on synthetic buffers; deterministic full-pipeline in `pipeline.test.ts` — identical photos → all-neutral & stable, smoother B → improved). Authenticated e2e `compare.spec.ts` (signup → login → upload ×2 → compare reaches a terminal state, no page errors).
+- **Fixed in passing:** no `SessionProvider` wrapped the dashboard tree — `useSession()` in `dashboard/page.tsx`, `settings/page.tsx`, `compare/page.tsx` had no provider. Added `src/app/providers.tsx` (SessionProvider + ToastProvider) in the root layout; removed the ad-hoc one in `page.tsx`.
+- **Deferred to Phase 3:** local `public/uploads` fallback still used when R2 is unset (now gitignored) — Phase 3 P3.3 replaces it with private owner-scoped storage. CDN `script-src`/`connect-src` (jsdelivr + `storage.googleapis.com` model weights) must be in the CSP — Phase 3 P3.5.
+- Gate: `next build` ✅ · `tsc --noEmit` ✅ · `eslint` ✅ (5 pre-existing warnings) · `vitest` 33/33 ✅ · `playwright` 10/10 ✅.
+
 ### P2.1 Face landmark module  → (none)
 
 - Rewrite `src/lib/faceDetection.ts` to load `@tensorflow-models/face-landmarks-detection` (MediaPipe FaceMesh runtime, already in deps) client-side. Lazy-import; guard SSR.

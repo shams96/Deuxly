@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { generateAnalysis } from "@/lib/analysis";
+import { validateAnalysisResult } from "@/lib/analysis";
 
 export async function POST(request: Request) {
   try {
@@ -12,11 +12,21 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { photoAId, photoBId } = body;
+    const { photoAId, photoBId, result: rawResult } = body;
 
     if (!photoAId || !photoBId) {
       return NextResponse.json(
         { error: "photoAId and photoBId are required" },
+        { status: 400 }
+      );
+    }
+
+    // Analysis is computed in the browser (client-side CV); the server
+    // validates the shape and numeric ranges before persisting.
+    const result = validateAnalysisResult(rawResult);
+    if (!result) {
+      return NextResponse.json(
+        { error: "Invalid analysis result" },
         { status: 400 }
       );
     }
@@ -36,18 +46,6 @@ export async function POST(request: Request) {
         { status: 404 }
       );
     }
-
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: { subscriptionStatus: true },
-    });
-    const isPremium = user?.subscriptionStatus === "premium";
-
-    const result = generateAnalysis(
-      photoA.storageUrl,
-      photoB.storageUrl,
-      isPremium
-    );
 
     const analysis = await prisma.analysis.create({
       data: {

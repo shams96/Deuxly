@@ -1,108 +1,114 @@
-import type { AnalysisResult } from "@/types";
+import type { AnalysisResult, AnalysisZone } from "@/types";
+import type { ZoneComparison } from "@/lib/metrics";
 
-const ZONES = [
+const DISCLAIMER =
+  "Analysis is an approximate visual estimate for personal tracking only. Not medical or diagnostic.";
+
+const ZONE_NAMES: readonly AnalysisZone[] = [
   "under-eye",
   "forehead",
   "cheeks",
   "jawline",
   "tone-texture",
-] as const;
-
-const IMPROVEMENT_NOTES = [
-  "Noticeable improvement in hydration and plumpness.",
-  "Fine lines appear reduced; skin texture feels smoother.",
-  "Tone appears more even with reduced dullness.",
-  "Pores appear less prominent with better oil balance.",
-  "Overall luminosity has increased from baseline.",
 ];
+const CHANGES = ["improved", "worsened", "neutral"] as const;
 
-const WORSENED_NOTES = [
-  "Mild dryness detected compared to baseline.",
-  "Slight increase in visible redness or sensitivity.",
-  "Texture appears slightly rougher in this area.",
-  "Tone appears slightly duller than previous capture.",
-  "Minor increase in visible congestion or pores.",
-];
+/**
+ * Validate an AnalysisResult received from the (untrusted) client before it is
+ * persisted. Returns a sanitised copy or null.
+ */
+export function validateAnalysisResult(input: unknown): AnalysisResult | null {
+  if (typeof input !== "object" || input === null) return null;
+  const r = input as Record<string, unknown>;
+  if (typeof r.summary !== "string" || r.summary.length > 2000) return null;
+  if (typeof r.disclaimer !== "string" || r.disclaimer.length > 500) return null;
+  if (!Array.isArray(r.zones) || r.zones.length > 8) return null;
 
-const NEUTRAL_NOTES = [
-  "No significant change detected from baseline.",
-  "Area remains stable with no notable variation.",
-  "Consistent appearance compared to previous measurement.",
-  "Change is minimal and within normal variation.",
-  "No measurable shift in texture or tone observed.",
-];
+  const zones: AnalysisResult["zones"] = [];
+  for (const z of r.zones) {
+    if (typeof z !== "object" || z === null) return null;
+    const zz = z as Record<string, unknown>;
+    if (!ZONE_NAMES.includes(zz.name as AnalysisZone)) return null;
+    if (!CHANGES.includes(zz.change as (typeof CHANGES)[number])) return null;
+    if (
+      typeof zz.confidence !== "number" ||
+      !Number.isFinite(zz.confidence) ||
+      zz.confidence < 0 ||
+      zz.confidence > 1
+    )
+      return null;
+    if (typeof zz.note !== "string" || zz.note.length > 500) return null;
+    zones.push({
+      name: zz.name as AnalysisZone,
+      change: zz.change as (typeof CHANGES)[number],
+      confidence: Math.round(zz.confidence * 100) / 100,
+      note: zz.note,
+    });
+  }
 
-function randomNote(pool: readonly string[]): string {
-  return pool[Math.floor(Math.random() * pool.length)];
+  return { zones, summary: r.summary, disclaimer: r.disclaimer };
 }
 
-function generateZoneResult() {
-  const r = Math.random();
-  const change: "improved" | "worsened" | "neutral" =
-    r < 0.5
-      ? "improved"
-      : r < 0.75
-        ? "neutral"
-        : "worsened";
-
-  const notes =
-    change === "improved"
-      ? IMPROVEMENT_NOTES
-      : change === "worsened"
-        ? WORSENED_NOTES
-        : NEUTRAL_NOTES;
-
-  return {
-    name: ZONES[Math.floor(Math.random() * ZONES.length)],
-    change,
-    // 0..1 float — consumers render as `confidence * 100`%.
-    confidence: Math.round((60 + Math.random() * 35)) / 100,
-    note: randomNote(notes),
-  } as const;
+function noteFor(z: ZoneComparison): string {
+  if (z.change === "improved") {
+    if (z.driver === "texture")
+      return "Surface texture looks smoother than baseline — fewer visible fine lines or roughness.";
+    if (z.driver === "redness")
+      return "Less visible redness and blotchiness than baseline.";
+    return "Overall appearance is more even than baseline.";
+  }
+  if (z.change === "worsened") {
+    if (z.driver === "texture")
+      return "Surface texture looks rougher than baseline — more visible unevenness.";
+    if (z.driver === "redness")
+      return "More visible redness or sensitivity than baseline.";
+    return "Slightly less even than baseline.";
+  }
+  if (z.driver === "tone")
+    return "Lighting differed between the two photos, so this area is reported as unchanged.";
+  return "No meaningful change from baseline in this area.";
 }
 
-export function generateAnalysis(
-  _photoA: string,
-  _photoB: string,
+/**
+ * Turn per-zone comparisons into the user-facing result. Free tier gets a
+ * summary only (no zones array); premium gets every zone with a note.
+ */
+export function buildAnalysisResult(
+  comparisons: ZoneComparison[],
   isPremium: boolean,
 ): AnalysisResult {
-  // Free tier gets no per-zone breakdown (summary only). Premium gets 5 zones.
-  const zones = isPremium
-    ? Array.from({ length: 5 }, () => generateZoneResult())
-    : [];
+  const scored = comparisons.filter((c) => c.name !== "tone-texture");
+  const improved = scored.filter((c) => c.change === "improved").length;
+  const worsened = scored.filter((c) => c.change === "worsened").length;
 
-  const overallImprovements = zones.filter((z) => z.change === "improved").length;
-  const overallWorsened = zones.filter((z) => z.change === "worsened").length;
-
-  let summary = "Comparison analysis complete. ";
-  if (overallImprovements > overallWorsened) {
-    summary +=
-      "Overall positive progress observed across most measured zones. ";
-    summary +=
-      "Hydration and tone show the most consistent improvement since baseline.";
-  } else if (overallWorsened > overallImprovements) {
-    summary +=
-      "Some areas show slight regression compared to baseline. ";
-    summary +=
-      "Consider reviewing recent skincare routine and environmental factors.";
+  let summary: string;
+  if (improved > worsened) {
+    summary =
+      "Overall, most measured areas look improved since baseline — the clearest gains are in texture and evenness.";
+  } else if (worsened > improved) {
+    summary =
+      "Some areas look slightly less even than baseline. Consider recent routine changes, sleep, or environment.";
   } else {
-    summary +=
-      "Results are mixed with no strong directional trend. ";
-    summary +=
-      "Continue current routine and monitor over the next capture cycle.";
+    summary =
+      "Results are mixed with no strong overall direction. Keep the current routine and re-check next capture.";
   }
-
   if (!isPremium) {
     summary +=
-      " This is a basic summary only. Upgrade to premium for detailed zone-by-zone breakdown, confidence scoring, and personalized recommendations.";
+      " Upgrade to Premium for a zone-by-zone breakdown with confidence scoring.";
   }
 
-  return {
-    zones: zones as AnalysisResult["zones"],
-    summary,
-    disclaimer:
-      "Analysis is an approximate visual estimate for personal tracking only. Not medical or diagnostic.",
-  };
+  const zones: AnalysisResult["zones"] = isPremium
+    ? comparisons
+        .filter((c) => c.name !== "tone-texture")
+        .map((c) => ({
+          name: c.name,
+          change: c.change,
+          confidence: c.confidence,
+          note: noteFor(c),
+        }))
+    : [];
+
+  return { zones, summary, disclaimer: DISCLAIMER };
 }
 
 export type { AnalysisResult };

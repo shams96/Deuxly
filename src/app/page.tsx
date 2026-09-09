@@ -1,7 +1,6 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { SessionProvider } from "next-auth/react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import CameraCapture from "@/components/CameraCapture";
@@ -52,12 +51,10 @@ function AppContent() {
 
 export default function Home() {
   return (
-    <SessionProvider>
-      <div className="min-h-screen flex flex-col">
-        <Header />
-        <AppContent />
-        <Footer />
-      </div>
-    </SessionProvider>
+    <div className="min-h-screen flex flex-col">
+      <Header />
+      <AppContent />
+      <Footer />
+    </div>
   );
 }

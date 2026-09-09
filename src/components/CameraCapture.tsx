@@ -36,12 +36,9 @@ export default function CameraCapture({ onCapture }: Props) {
   const [lightingOk, setLightingOk] = useState(false);
   const [distanceState, setDistanceState] = useState<DistanceState>("unknown");
   const [countdown, setCountdown] = useState<number | null>(null);
-  const [faceDetectorSupported] = useState(() => {
-    if (typeof window !== "undefined" && "FaceDetector" in window) {
-      return true;
-    }
-    return false;
-  });
+  // True while we expect the FaceMesh model to be usable; flips to false if it
+  // fails to load, which drops the UI back to manual guided capture.
+  const [faceDetectorSupported, setFaceDetectorSupported] = useState(true);
   const [detectorActive, setDetectorActive] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -130,103 +127,105 @@ export default function CameraCapture({ onCapture }: Props) {
     if (!stream || !videoRef.current) return;
     const video = videoRef.current;
     let animationId: number;
-    let detector: { detect(video: HTMLVideoElement): Promise<Array<{ boundingBox: DOMRectReadOnly }>> } | null = null;
+    let cancelled = false;
+    let inFlight = false;
+    let lastRun = 0;
+    let failures = 0;
+    let detector: Awaited<ReturnType<typeof import("@/lib/faceLandmarks").getFaceDetector>> | null = null;
 
     const initDetector = async () => {
       try {
-        const FaceDetectorConstructor = (window as unknown as { FaceDetector: new () => { detect(video: HTMLVideoElement): Promise<Array<{ boundingBox: DOMRectReadOnly }>> } }).FaceDetector;
-        if (FaceDetectorConstructor) {
-          detector = new FaceDetectorConstructor();
-          setDetectorActive(true);
-        } else {
-          setDetectorActive(false);
-        }
+        const { getFaceDetector } = await import("@/lib/faceLandmarks");
+        detector = await getFaceDetector();
+        if (!cancelled) setDetectorActive(true);
       } catch {
-        detector = null;
-        setDetectorActive(false);
+        if (!cancelled) {
+          detector = null;
+          setDetectorActive(false);
+          setFaceDetectorSupported(false);
+        }
       }
     };
 
-    const detect = async () => {
-      if (video.readyState < 2) {
-        animationId = requestAnimationFrame(detect);
+    const initializing = () =>
+      setQuality([
+        { label: "Face detected", met: false, instruction: "Starting face detection…" },
+        { label: "Face centered", met: false, instruction: "Starting face detection…" },
+        { label: "Good distance", met: false, instruction: "Starting face detection…" },
+        { label: "Neutral expression", met: true, instruction: "Keep a neutral expression for consistency" },
+      ]);
+
+    const noFace = () =>
+      setQuality([
+        { label: "Face detected", met: false, instruction: "Make sure your face is visible in the frame" },
+        { label: "Face centered", met: false, instruction: "Position your face in the center of the oval" },
+        { label: "Good distance", met: false, instruction: "Hold your phone about 2 feet away from your face" },
+        { label: "Neutral expression", met: true, instruction: "Keep a neutral expression for consistency" },
+      ]);
+
+    const loop = async () => {
+      if (cancelled) return;
+      animationId = requestAnimationFrame(loop);
+
+      if (video.readyState < 2) return;
+      const now = Date.now();
+      if (inFlight || now - lastRun < 180) return;
+
+      if (!detector) {
+        if (faceDetectorSupported) initializing();
         return;
       }
 
-      const elapsed = Date.now() - (video.dataset.startedAt ? parseInt(video.dataset.startedAt) : Date.now());
-      const ready = elapsed > 1500;
+      inFlight = true;
+      lastRun = now;
+      try {
+        const faces = await detector.estimateFaces(video, { staticImageMode: false });
+        const face = faces[0];
+        if (face?.box) {
+          failures = 0;
+          const faceSize = Math.max(
+            face.box.height / video.videoHeight,
+            face.box.width / video.videoWidth,
+          );
+          let distance: DistanceState = "unknown";
+          if (faceSize > 0.55) distance = "too_close";
+          else if (faceSize > 0.22) distance = "good";
+          else if (faceSize > 0) distance = "too_far";
+          setDistanceState(distance);
 
-      if (detector && ready) {
-        try {
-          const faces = await detector.detect(video);
-          const face = faces[0];
-          if (face && face.boundingBox) {
-            const faceHeightRatio = face.boundingBox.height / video.videoHeight;
-            const faceWidthRatio = face.boundingBox.width / video.videoWidth;
-            const faceSize = Math.max(faceHeightRatio, faceWidthRatio);
+          const centered =
+            face.box.xMin > video.videoWidth * 0.1 &&
+            face.box.xMax < video.videoWidth * 0.9;
 
-            let distance: DistanceState = "unknown";
-            if (faceSize > 0.55) {
-              distance = "too_close";
-            } else if (faceSize > 0.22 && faceSize <= 0.55) {
-              distance = "good";
-            } else if (faceSize > 0 && faceSize <= 0.22) {
-              distance = "too_far";
-            }
-
-            setDistanceState(distance);
-
-            const centered = face.boundingBox.x > video.videoWidth * 0.1 && 
-                             face.boundingBox.x + face.boundingBox.width < video.videoWidth * 0.9;
-
-            setQuality([
-              { label: "Face detected", met: true, instruction: "Great! Your face is visible" },
-              { label: "Face centered", met: centered, instruction: "Perfect! Your face is centered in the oval" },
-              { label: "Good distance", met: distance === "good", instruction: getDistanceInstruction(distance) },
-              { label: "Neutral expression", met: true, instruction: "Good expression! Ready to capture" },
-            ]);
-          } else {
-            setDistanceState("unknown");
-            setQuality([
-              { label: "Face detected", met: false, instruction: "Make sure your face is visible in the frame" },
-              { label: "Face centered", met: false, instruction: "Position your face in the center of the oval" },
-              { label: "Good distance", met: false, instruction: "Hold your phone about 2 feet away from your face" },
-              { label: "Neutral expression", met: true, instruction: "Keep a neutral expression for consistency" },
-            ]);
-          }
-        } catch {
+          setQuality([
+            { label: "Face detected", met: true, instruction: "Great! Your face is visible" },
+            { label: "Face centered", met: centered, instruction: "Center your face in the oval" },
+            { label: "Good distance", met: distance === "good", instruction: getDistanceInstruction(distance) },
+            { label: "Neutral expression", met: true, instruction: "Good expression! Ready to capture" },
+          ]);
+        } else {
           setDistanceState("unknown");
-          setDetectorActive(false);
+          noFace();
         }
-      } else if (!ready) {
+      } catch {
+        failures += 1;
+        if (failures > 5) {
+          detector = null;
+          setDetectorActive(false);
+          setFaceDetectorSupported(false);
+        }
         setDistanceState("unknown");
-        setQuality([
-          { label: "Face detected", met: false, instruction: "Initializing camera..." },
-          { label: "Face centered", met: false, instruction: "Initializing camera..." },
-          { label: "Good distance", met: false, instruction: "Initializing camera..." },
-          { label: "Neutral expression", met: true, instruction: "Keep a neutral expression for consistency" },
-        ]);
-      } else {
-        setDistanceState("unknown");
-        setQuality([
-          { label: "Face detected", met: false, instruction: "Face detection unavailable in this browser" },
-          { label: "Face centered", met: false, instruction: "Face detection unavailable in this browser" },
-          { label: "Good distance", met: false, instruction: "Face detection unavailable in this browser" },
-          { label: "Neutral expression", met: true, instruction: "Keep a neutral expression for consistency" },
-        ]);
-        setDetectorActive(false);
+      } finally {
+        inFlight = false;
       }
-
-      animationId = requestAnimationFrame(detect);
     };
 
     initDetector();
-
-    if (!video.dataset.startedAt) {
-      video.dataset.startedAt = Date.now().toString();
-    }
-    animationId = requestAnimationFrame(detect);
-    return () => cancelAnimationFrame(animationId);
+    animationId = requestAnimationFrame(loop);
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(animationId);
+    };
   }, [stream, faceDetectorSupported]);
 
   useEffect(() => {
@@ -444,7 +443,7 @@ export default function CameraCapture({ onCapture }: Props) {
         {!faceDetectorSupported && (
           <div className="p-3 rounded-xl bg-[#F3F0EB] border border-[#E8E2DA]">
             <p className="text-xs text-[#6B6560]">
-              Distance detection is not supported in this browser. The app will use guided positioning instead. For the best experience, use Chrome or Edge.
+              Automatic face detection couldn&apos;t start on this device. The app will use guided positioning instead — line your face up with the oval.
             </p>
           </div>
         )}
@@ -570,7 +569,7 @@ export default function CameraCapture({ onCapture }: Props) {
       {!detectorActive && (
         <div className="p-3 rounded-xl bg-[#F3F0EB] border border-[#E8E2DA]">
           <p className="text-xs text-[#6B6560] text-center">
-            Face detection is not available in this browser. Position your face in the oval and tap Capture below.
+            Automatic face detection is unavailable. Position your face in the oval and tap Capture below.
           </p>
         </div>
       )}

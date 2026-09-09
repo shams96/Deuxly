@@ -1,61 +1,70 @@
 "use client";
 
-import { AnalysisZone, AnalysisResult } from "@/types";
+import Image from "next/image";
+import type { AnalysisZone } from "@/types";
+import type { OverlayZone } from "@/lib/compareImages";
 
 type Props = {
-  analysis: AnalysisResult;
-  imageWidth: number;
-  imageHeight: number;
+  /** Image the zones were measured against (baseline / photo A). */
+  imageUrl: string;
+  zones: OverlayZone[];
 };
 
-const ZONE_COLORS: Record<string, string> = {
-  improved: "rgba(138,154,123,0.3)",
-  worsened: "rgba(184,122,122,0.3)",
-  neutral: "rgba(198,184,164,0.2)",
+const STROKE: Record<OverlayZone["change"], string> = {
+  improved: "#8A9A7B",
+  worsened: "#B87A7A",
+  neutral: "#C6B8A4",
+};
+const FILL: Record<OverlayZone["change"], string> = {
+  improved: "rgba(138,154,123,0.22)",
+  worsened: "rgba(184,122,122,0.22)",
+  neutral: "rgba(198,184,164,0.16)",
 };
 
-const ZONE_POSITIONS: Record<AnalysisZone, { x: number; y: number; w: number; h: number }> = {
-  "under-eye": { x: 30, y: 55, w: 40, h: 15 },
-  forehead: { x: 25, y: 10, w: 50, h: 25 },
-  cheeks: { x: 20, y: 45, w: 60, h: 25 },
-  jawline: { x: 25, y: 75, w: 50, h: 20 },
-  "tone-texture": { x: 15, y: 15, w: 70, h: 70 },
+const LABEL: Record<AnalysisZone, string> = {
+  "under-eye": "Under-eye",
+  forehead: "Forehead",
+  cheeks: "Cheeks",
+  jawline: "Jawline",
+  "tone-texture": "Tone & texture",
 };
 
-export default function VisualOverlay({ analysis, imageWidth, imageHeight }: Props) {
+export default function VisualOverlay({ imageUrl, zones }: Props) {
+  if (zones.length === 0) return null;
+
   return (
-    <div className="relative w-full" style={{ aspectRatio: `${imageWidth}/${imageHeight}` }}>
-      <svg
-        viewBox={`0 0 ${imageWidth} ${imageHeight}`}
-        className="absolute inset-0 h-full w-full"
-        preserveAspectRatio="none"
-      >
-        {analysis.zones.map((zone) => (
-          <rect
-            key={zone.name}
-            x={ZONE_POSITIONS[zone.name].x}
-            y={ZONE_POSITIONS[zone.name].y}
-            width={ZONE_POSITIONS[zone.name].w}
-            height={ZONE_POSITIONS[zone.name].h}
-            fill={ZONE_COLORS[zone.change]}
-            stroke={zone.change === "improved" ? "#8A9A7B" : zone.change === "worsened" ? "#B87A7A" : "#C6B8A4"}
-            strokeWidth="2"
-            rx="8"
-          />
-        ))}
-      </svg>
+    <div>
+      <div className="relative aspect-[3/4] w-full overflow-hidden rounded-2xl bg-[#F9F7F4] shadow-sm">
+        <Image src={imageUrl} alt="Analysed baseline" fill className="object-cover" />
+        <svg
+          viewBox="0 0 1 1"
+          preserveAspectRatio="none"
+          className="absolute inset-0 h-full w-full"
+        >
+          {zones.map((z) => (
+            <polygon
+              key={z.name}
+              points={z.polygon.map((p) => `${p.x},${p.y}`).join(" ")}
+              fill={FILL[z.change]}
+              stroke={STROKE[z.change]}
+              strokeWidth={0.004}
+              vectorEffect="non-scaling-stroke"
+            />
+          ))}
+        </svg>
+      </div>
 
       <div className="mt-3 flex flex-wrap gap-2">
-        {analysis.zones.map((zone) => (
+        {zones.map((z) => (
           <span
-            key={zone.name}
-            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-white border border-[#E8E2DA]"
+            key={z.name}
+            className="inline-flex items-center gap-1.5 rounded-full border border-[#E8E2DA] bg-white px-2.5 py-1 text-xs font-medium"
           >
             <span
-              className="w-2.5 h-2.5 rounded-full"
-              style={{ backgroundColor: zone.change === "improved" ? "#8A9A7B" : zone.change === "worsened" ? "#B87A7A" : "#C6B8A4" }}
+              className="h-2.5 w-2.5 rounded-full"
+              style={{ backgroundColor: STROKE[z.change] }}
             />
-            {zone.name}
+            {LABEL[z.name]}
           </span>
         ))}
       </div>

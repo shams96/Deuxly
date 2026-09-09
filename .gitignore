@@ -47,3 +47,6 @@ next-env.d.ts
 # local prisma sqlite (legacy)
 prisma/*.db
 prisma/**/*.db
+
+# local storage fallback when R2 is not configured (removed in Phase 3)
+/public/uploads
