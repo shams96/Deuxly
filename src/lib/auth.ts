@@ -46,11 +46,31 @@ if (process.env.APPLE_CLIENT_ID && process.env.APPLE_CLIENT_SECRET) {
   );
 }
 
+if (!process.env.NEXTAUTH_SECRET) {
+  // Surfaces unmistakably in the host's function logs. Without a secret,
+  // NextAuth returns "There is a problem with the server configuration" for
+  // every sign-in in production.
+  console.error(
+    "[deuxly-auth] NEXTAUTH_SECRET is not set — sign-in will fail in production. " +
+      "Set it in your host's environment variables and redeploy.",
+  );
+}
+
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   secret: process.env.NEXTAUTH_SECRET,
   session: { strategy: "jwt" },
   providers,
+  debug: process.env.NEXTAUTH_DEBUG === "true",
+  logger: {
+    error(code, metadata) {
+      console.error(`[deuxly-auth] ${code}`, metadata);
+    },
+    warn(code) {
+      console.warn(`[deuxly-auth] ${code}`);
+    },
+    debug() {},
+  },
   callbacks: {
     async jwt({ token, user }) {
       if (user) token.id = user.id;
