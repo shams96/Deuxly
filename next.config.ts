@@ -1,5 +1,24 @@
 import type { NextConfig } from "next";
 
+// Fail the build loudly on missing critical config, so a misconfigured deploy
+// surfaces as a readable build error instead of NextAuth's opaque
+// "There is a problem with the server configuration" page at runtime.
+if (process.env.NODE_ENV === "production" && process.env.NEXT_PHASE !== "phase-development-server") {
+  const missing = ["DATABASE_URL", "NEXTAUTH_SECRET"].filter((k) => !process.env[k]);
+  if (missing.length > 0) {
+    throw new Error(
+      `Missing required environment variable(s): ${missing.join(", ")}. ` +
+        `Set them in your host's project settings (see DEPLOY.md) and redeploy.`,
+    );
+  }
+  const url = process.env.NEXTAUTH_URL;
+  if (url && !/^https?:\/\//.test(url)) {
+    throw new Error(
+      `NEXTAUTH_URL must include the protocol, e.g. https://your-app.vercel.app (got "${url}").`,
+    );
+  }
+}
+
 // TensorFlow.js and the FaceMesh model load from jsDelivr at runtime; model
 // weights come from storage.googleapis.com. 'unsafe-eval' / 'wasm-unsafe-eval'
 // are required by the tfjs runtime — tighten once the CV path is bundled or
