@@ -77,7 +77,7 @@ export default function ShareCard({ photoAUrl, photoBLabel, photoBUrl, photoALab
       <canvas ref={canvasRef} className="hidden" />
       <button
         onClick={share}
-        className="w-full py-3 rounded-xl bg-[#C6B8A4] text-white font-medium hover:bg-[#B8A892] transition-colors"
+        className="w-full py-3 rounded-xl bg-accent text-on-fill font-medium hover:bg-accent-strong transition-colors"
       >
         Share Progress Card
       </button>

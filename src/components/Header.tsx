@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { signOut } from "@/lib/signOut";
 import { Button } from "@/components/ui/Button";
+import ThemeToggle from "@/components/ThemeToggle";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -20,11 +21,11 @@ export function Header() {
   const { data: session, status } = useSession();
 
   return (
-    <header className="sticky top-0 z-50 bg-[#F9F7F4]/80 backdrop-blur-md border-b border-[#E8E2DA]">
+    <header className="sticky top-0 z-50 bg-bg/80 backdrop-blur-md border-b border-line">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <span className="text-xl font-semibold tracking-tight text-[#1C1C1C]">
+            <span className="text-xl font-semibold tracking-tight text-ink">
               Deuxly
             </span>
           </Link>
@@ -36,8 +37,8 @@ export function Header() {
                 href={link.href}
                 className={`text-sm font-medium transition-colors ${
                   pathname === link.href
-                    ? "text-[#1C1C1C]"
-                    : "text-[#6B6560] hover:text-[#1C1C1C]"
+                    ? "text-ink"
+                    : "text-ink-2 hover:text-ink"
                 }`}
               >
                 {link.label}
@@ -46,9 +47,10 @@ export function Header() {
           </nav>
 
           <div className="hidden md:flex items-center gap-4">
+            <ThemeToggle />
             {status === "authenticated" && session?.user ? (
               <div className="flex items-center gap-4">
-                <span className="text-sm text-[#6B6560]">
+                <span className="text-sm text-ink-2">
                   {session.user.name}
                 </span>
                 <Button
@@ -68,7 +70,7 @@ export function Header() {
 
           <button
             type="button"
-            className="md:hidden p-2 text-[#1C1C1C]"
+            className="md:hidden p-2 text-ink"
             onClick={() => setIsOpen(!isOpen)}
             aria-label="Toggle menu"
           >
@@ -106,7 +108,7 @@ export function Header() {
       </div>
 
       {isOpen && (
-        <div className="md:hidden border-t border-[#E8E2DA] bg-[#F9F7F4]">
+        <div className="md:hidden border-t border-line bg-bg">
           <div className="px-4 pt-2 pb-4 space-y-1">
             {navLinks.map((link) => (
               <Link
@@ -114,8 +116,8 @@ export function Header() {
                 href={link.href}
                 className={`block px-3 py-2 rounded-md text-base font-medium ${
                   pathname === link.href
-                    ? "text-[#1C1C1C] bg-[#EDE6DC]"
-                    : "text-[#6B6560] hover:text-[#1C1C1C]"
+                    ? "text-on-fill bg-accent-soft"
+                    : "text-ink-2 hover:text-ink"
                 }`}
                 onClick={() => setIsOpen(false)}
               >
@@ -125,14 +127,14 @@ export function Header() {
             {status === "authenticated" && session?.user ? (
               <button
                 onClick={() => signOut()}
-                className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-[#6B6560] hover:text-[#1C1C1C]"
+                className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-ink-2 hover:text-ink"
               >
                 Sign Out
               </button>
             ) : (
               <Link
                 href="/signup"
-                className="block px-3 py-2 rounded-md text-base font-medium text-[#C6B8A4] hover:text-[#B8A892]"
+                className="block px-3 py-2 rounded-md text-base font-medium text-accent-ink hover:text-accent-ink"
                 onClick={() => setIsOpen(false)}
               >
                 Get Started

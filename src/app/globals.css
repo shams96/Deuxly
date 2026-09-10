@@ -1,20 +1,90 @@
 @import "tailwindcss";
 
+/* Manual theme toggle wins in both directions; otherwise follow the OS. */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/*
+ * Semantic tokens. Class names derive from the suffix after --color-, e.g.
+ * --color-accent -> bg-accent / text-accent / border-accent (+ /opacity).
+ * The light palette is the base; dark redefines the same roles.
+ */
+@theme {
+  --color-bg: #f9f7f4;
+  --color-surface: #ffffff;
+  --color-surface-2: #f3f0eb;
+  --color-ink: #1c1c1c;
+  --color-ink-2: #5f5a55;
+  --color-ink-3: #767068;
+  --color-line: #e8e2da;
+  --color-accent: #c6b8a4;
+  --color-accent-strong: #b8a892;
+  --color-accent-soft: #ede6dc;
+  --color-accent-ink: #786a52;
+  --color-success-ink: #4f6b3f;
+  --color-danger-ink: #9e4b4b;
+  /* Constant in both themes: brand fills stay light-toned, so labels on them
+     are always near-black. */
+  --color-on-fill: #1c1c1c;
+  --color-success: #8a9a7b;
+  --color-success-strong: #7a8a6b;
+  --color-warning: #c4a484;
+  --color-danger: #a35d5d;
+  --color-danger-strong: #8f4f4f;
+  --color-overlay: rgba(28, 28, 28, 0.45);
+}
+
 :root {
-  --color-background: #F9F7F4;
-  --color-surface: #FFFFFF;
-  --color-surface-elevated: #F3F0EB;
-  --color-text-primary: #1C1C1C;
-  --color-text-secondary: #6B6560;
-  --color-text-tertiary: #9C958D;
-  --color-accent: #C6B8A4;
-  --color-accent-hover: #B8A892;
-  --color-accent-muted: #EDE6DC;
-  --color-border: #E8E2DA;
-  --color-success: #8A9A7B;
-  --color-warning: #C4A484;
-  --color-error: #B87A7A;
-  --color-overlay: rgba(28, 28, 28, 0.4);
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --color-bg: #17150f;
+    --color-surface: #201d16;
+    --color-surface-2: #2a2620;
+    --color-ink: #f2ede4;
+    --color-ink-2: #b8b0a4;
+    --color-ink-3: #938a7e;
+    --color-line: #38332b;
+    --color-accent: #cdbfab;
+    --color-accent-strong: #ddd0bd;
+    --color-accent-soft: #322c22;
+    --color-accent-ink: #dccbb0;
+    --color-success-ink: #a9c197;
+    --color-danger-ink: #e0a5a5;
+    --color-on-fill: #1c1c1c;
+    --color-success: #9aab8a;
+    --color-success-strong: #aebd9f;
+    --color-warning: #d0b291;
+    --color-danger: #cf9393;
+    --color-danger-strong: #dda9a9;
+    --color-overlay: rgba(0, 0, 0, 0.6);
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --color-bg: #17150f;
+  --color-surface: #201d16;
+  --color-surface-2: #2a2620;
+  --color-ink: #f2ede4;
+  --color-ink-2: #b8b0a4;
+  --color-ink-3: #938a7e;
+  --color-line: #38332b;
+  --color-accent: #cdbfab;
+  --color-accent-strong: #ddd0bd;
+  --color-accent-soft: #322c22;
+    --color-accent-ink: #dccbb0;
+    --color-success-ink: #a9c197;
+    --color-danger-ink: #e0a5a5;
+    --color-on-fill: #1c1c1c;
+  --color-success: #9aab8a;
+  --color-success-strong: #aebd9f;
+  --color-warning: #d0b291;
+  --color-danger: #cf9393;
+  --color-danger-strong: #dda9a9;
+  --color-overlay: rgba(0, 0, 0, 0.6);
+  color-scheme: dark;
 }
 
 html {
@@ -22,13 +92,34 @@ html {
   -webkit-tap-highlight-color: transparent;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
 body {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  background-color: var(--color-background);
-  color: var(--color-text-primary);
+  font-family: var(--font-inter), system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, sans-serif;
+  background-color: var(--color-bg);
+  color: var(--color-ink);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
+}
+
+/* Visible keyboard focus everywhere, without touching mouse users. */
+:focus-visible {
+  outline: 2px solid var(--color-accent-strong);
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
 video {

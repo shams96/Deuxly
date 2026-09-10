@@ -2,7 +2,7 @@ const CACHE_NAME = "deuxly-static-v2";
 const IMAGE_CACHE_NAME = "deuxly-images-v2";
 const KNOWN_CACHES = [CACHE_NAME, IMAGE_CACHE_NAME];
 
-const STATIC_ASSETS = ["/", "/manifest.json"];
+const STATIC_ASSETS = ["/", "/manifest.webmanifest"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(

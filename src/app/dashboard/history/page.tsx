@@ -49,8 +49,8 @@ export default function HistoryPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-[#1C1C1C] mb-1">History</h1>
-          <p className="text-sm text-[#6B6560]">
+          <h1 className="text-2xl font-semibold text-ink mb-1">History</h1>
+          <p className="text-sm text-ink-2">
             {photos.length} photo{photos.length !== 1 ? "s" : ""}
           </p>
         </div>
@@ -58,7 +58,7 @@ export default function HistoryPage() {
         {selectedIds.length === 2 && (
           <Link
             href={`/dashboard/compare?a=${selectedIds[0]}&b=${selectedIds[1]}`}
-            className="px-4 py-2 rounded-xl bg-[#C6B8A4] text-white text-sm font-medium hover:bg-[#B8A892] transition-colors"
+            className="px-4 py-2 rounded-xl bg-accent text-on-fill text-sm font-medium hover:bg-accent-strong transition-colors"
           >
             Compare
           </Link>
@@ -66,7 +66,7 @@ export default function HistoryPage() {
       </div>
 
       {loading ? (
-        <div className="text-center text-[#6B6560] py-12">Loading...</div>
+        <div className="text-center text-ink-2 py-12">Loading...</div>
       ) : (
         <PhotoTimeline
           photos={photos}

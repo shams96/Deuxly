@@ -25,11 +25,11 @@ export default function PhotoTimeline({ photos, selectedIds, onSelect, onDelete,
   if (photos.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-center">
-        <svg className="w-16 h-16 text-[#E8E2DA] mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
+        <svg className="w-16 h-16 text-line mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M18.75 6.75h.008v.008h-.008V6.75zm-3.75 0h.008v.008h-.008V6.75zm-3.75 0h.008v.008h-.008V6.75z" />
         </svg>
-        <h3 className="text-lg font-medium text-[#1C1C1C] mb-2">No photos yet</h3>
-        <p className="text-sm text-[#6B6560]">Start documenting your skincare journey</p>
+        <h3 className="text-lg font-medium text-ink mb-2">No photos yet</h3>
+        <p className="text-sm text-ink-2">Start documenting your skincare journey</p>
       </div>
     );
   }
@@ -42,7 +42,7 @@ export default function PhotoTimeline({ photos, selectedIds, onSelect, onDelete,
             key={photo.id}
             className={`relative aspect-[3/4] rounded-2xl overflow-hidden cursor-pointer transition-all ${
               selectedIds.includes(photo.id)
-                ? "ring-2 ring-[#C6B8A4] ring-offset-2"
+                ? "ring-2 ring-accent ring-offset-2"
                 : "hover:opacity-80"
             }`}
             onClick={() => onSelect(photo.id)}
@@ -75,7 +75,7 @@ export default function PhotoTimeline({ photos, selectedIds, onSelect, onDelete,
               </button>
             )}
             {selectedIds.includes(photo.id) && (
-              <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-[#C6B8A4] flex items-center justify-center">
+              <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-accent flex items-center justify-center">
                 <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                 </svg>
@@ -99,14 +99,14 @@ export default function PhotoTimeline({ photos, selectedIds, onSelect, onDelete,
       </div>
 
       {deleteId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(28,28,28,0.4)]">
-          <div className="bg-white rounded-2xl p-6 max-w-sm w-full mx-4 shadow-lg">
-            <h3 className="text-lg font-semibold text-[#1C1C1C] mb-2">Delete photo?</h3>
-            <p className="text-sm text-[#6B6560] mb-6">This action cannot be undone.</p>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-overlay">
+          <div className="bg-surface rounded-2xl p-6 max-w-sm w-full mx-4 shadow-lg">
+            <h3 className="text-lg font-semibold text-ink mb-2">Delete photo?</h3>
+            <p className="text-sm text-ink-2 mb-6">This action cannot be undone.</p>
             <div className="flex gap-3">
               <button
                 onClick={() => setDeleteId(null)}
-                className="flex-1 py-3 rounded-xl border border-[#E8E2DA] text-[#1C1C1C] font-medium hover:bg-[#F3F0EB] transition-colors"
+                className="flex-1 py-3 rounded-xl border border-line text-ink font-medium hover:bg-surface-2 transition-colors"
               >
                 Cancel
               </button>
@@ -115,7 +115,7 @@ export default function PhotoTimeline({ photos, selectedIds, onSelect, onDelete,
                   onDelete?.(deleteId);
                   setDeleteId(null);
                 }}
-                className="flex-1 py-3 rounded-xl bg-[#B87A7A] text-white font-medium hover:bg-[#A86A6A] transition-colors"
+                className="flex-1 py-3 rounded-xl bg-danger text-on-fill font-medium hover:bg-danger-strong transition-colors"
               >
                 Delete
               </button>

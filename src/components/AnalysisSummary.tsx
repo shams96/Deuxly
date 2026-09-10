@@ -16,9 +16,9 @@ const ZONE_LABELS: Record<AnalysisZone, string> = {
 
 // Diverging pair + neutral midpoint (brand: sage / warm gray / rose).
 const COLOR = {
-  improved: "#8A9A7B",
-  neutral: "#C6B8A4",
-  worsened: "#B87A7A",
+  improved: "var(--color-success)",
+  neutral: "var(--color-accent)",
+  worsened: "var(--color-danger)",
 } as const;
 
 const GLYPH = { improved: "▲", neutral: "—", worsened: "▼" } as const;
@@ -42,22 +42,22 @@ function ZoneRow({
   return (
     <div className="py-2.5">
       <div className="mb-1 flex items-baseline justify-between gap-3">
-        <span className="text-sm font-medium text-[#1C1C1C]">
+        <span className="text-sm font-medium text-ink">
           {ZONE_LABELS[name]}
         </span>
-        <span className="text-xs text-[#6B6560]">
+        <span className="text-xs text-ink-2">
           <span style={{ color }}>{GLYPH[change]}</span> {WORD[change]}
-          <span className="text-[#9C958D]"> · {Math.round(confidence * 100)}%</span>
+          <span className="text-ink-3"> · {Math.round(confidence * 100)}%</span>
         </span>
       </div>
       <div
-        className="relative h-2 rounded-full bg-[#F3F0EB]"
+        className="relative h-2 rounded-full bg-surface-2"
         role="img"
         aria-label={`${ZONE_LABELS[name]}: ${WORD[change]}, ${Math.round(
           confidence * 100,
         )}% confidence`}
       >
-        <span className="absolute left-1/2 top-[-2px] h-[calc(100%+4px)] w-px bg-[#E8E2DA]" />
+        <span className="absolute left-1/2 top-[-2px] h-[calc(100%+4px)] w-px bg-line" />
         <span
           className="absolute top-0 h-full rounded-full"
           style={{
@@ -67,7 +67,7 @@ function ZoneRow({
           }}
         />
       </div>
-      <p className="mt-1 text-xs text-[#9C958D]">{note}</p>
+      <p className="mt-1 text-xs text-ink-3">{note}</p>
     </div>
   );
 }
@@ -75,14 +75,14 @@ function ZoneRow({
 export default function AnalysisSummary({ analysis }: Props) {
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-semibold text-[#1C1C1C]">Analysis summary</h3>
+      <h3 className="text-lg font-semibold text-ink">Analysis summary</h3>
 
       {analysis.zones.length > 0 && (
-        <div className="rounded-2xl border border-[#E8E2DA] bg-white p-4 divide-y divide-[#F3F0EB]">
+        <div className="rounded-2xl border border-line bg-surface p-4 divide-y divide-surface-2">
           {analysis.zones.map((z) => (
             <ZoneRow key={z.name} {...z} />
           ))}
-          <div className="flex items-center gap-4 pt-3 text-xs text-[#9C958D]">
+          <div className="flex items-center gap-4 pt-3 text-xs text-ink-3">
             <span>
               <span style={{ color: COLOR.worsened }}>◀</span> regressed
             </span>
@@ -94,11 +94,11 @@ export default function AnalysisSummary({ analysis }: Props) {
         </div>
       )}
 
-      <div className="rounded-2xl border border-[#E8E2DA] bg-white p-5">
-        <p className="text-sm leading-relaxed text-[#1C1C1C]">{analysis.summary}</p>
+      <div className="rounded-2xl border border-line bg-surface p-5">
+        <p className="text-sm leading-relaxed text-ink">{analysis.summary}</p>
       </div>
 
-      <p className="text-xs italic text-[#9C958D]">{analysis.disclaimer}</p>
+      <p className="text-xs italic text-ink-3">{analysis.disclaimer}</p>
     </div>
   );
 }

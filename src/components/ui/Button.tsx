@@ -19,11 +19,11 @@ const sizeClasses: Record<ButtonSize, string> = {
 
 const variantClasses: Record<ButtonVariant, string> = {
   primary:
-    "bg-[#C6B8A4] text-[#1C1C1C] hover:bg-[#B8A892] border border-transparent",
+    "bg-accent text-on-fill hover:bg-accent-strong border border-transparent",
   secondary:
-    "bg-[#1C1C1C] text-[#C6B8A4] hover:bg-[#2a2a2a] border border-transparent",
+    "bg-ink text-bg hover:opacity-90 border border-transparent",
   outline:
-    "bg-transparent text-[#1C1C1C] border border-[#E8E2DA] hover:border-[#C6B8A4] hover:text-[#B8A892]",
+    "bg-transparent text-ink border border-line hover:border-accent hover:text-accent-ink",
 };
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
@@ -40,7 +40,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     ref
   ) => {
     const classes = [
-      "inline-flex items-center justify-center rounded-full font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-[#C6B8A4] focus:ring-offset-2 focus:ring-offset-[#F9F7F4] disabled:opacity-60 disabled:cursor-not-allowed",
+      "inline-flex items-center justify-center rounded-full font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-bg disabled:opacity-60 disabled:cursor-not-allowed",
       sizeClasses[size],
       variantClasses[variant],
       className,

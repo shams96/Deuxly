@@ -218,6 +218,17 @@ Branch: `feat/phase-3-security`. Can start after Phase 1 (parallel with Phase 2 
 
 Branch: `feat/phase-4-design`. After Phase 1 (independent of 2/3 but merge last to avoid churn).
 
+**Status (2026-09-10): COMPLETE — pending review/merge.**
+- P4.1 ✅ Palette tokenised into Tailwind v4 `@theme` (`bg`, `surface`, `surface-2`, `ink`/`ink-2`/`ink-3`, `line`, `accent`/`accent-strong`/`accent-soft`/`accent-ink`, `success`/`success-ink`, `danger`/`danger-ink`, `warning`, `on-fill`, `overlay`). Codemod replaced ~500 `bg-[#hex]` arbitrary values across 29 files; `bg-white`→`bg-surface`; JS colour literals → `var(--color-*)`. README brand section still lists the old raw-hex guidance — update if it matters.
+- P4.2 ✅ Dark mode — full dark token set under `@media (prefers-color-scheme: dark)` (guarded `:not([data-theme="light"])`) and `:root[data-theme="dark"]`. `ThemeToggle` (system → light → dark) via `useSyncExternalStore`; no-FOUC inline script in `layout.tsx`; `viewport.themeColor` per scheme. Wired into landing `Header` + dashboard `nav`.
+- P4.3 ✅ A11y — global `:focus-visible` ring + `prefers-reduced-motion` reset in `globals.css`; `aria-label`/`aria-expanded` on icon buttons; `aria-current="page"` on nav; `PhotoModal` got `role="dialog"`, focus trap, Escape, restore-focus, backdrop dismiss; form `label htmlFor`; Toast `role="status"`. **Contrast pass:** darkened `ink-2`/`ink-3`, added readable `-ink` variants for accent/success/danger text, `on-fill` (constant near-black) for labels on brand fills, darkened `danger`. axe (wcag2a/aa) clean on `/`, `/login`, `/signup` in light **and** dark.
+- P4.4 ✅ Real landing page (`src/app/page.tsx`) — hero, how-it-works (3 steps), privacy stance, pricing (Free/Premium from README), final CTA. Authenticated visitors redirect to `/dashboard`. Old camera-only page removed.
+- P4.5 ✅ Motion (`framer-motion` 13, `apple-design` skill) — `Reveal` (spring `bounce:0`), Toast enter/exit spring (`bounce:0.2`, `layout`), `PhotoModal` spring sheet (`bounce:0.15`). All `useReducedMotion`-aware; global reduced-motion CSS as backstop.
+- P4.6 ✅ PWA — deleted `public/manifest.json`, kept typed `src/app/manifest.ts` (`/manifest.webmanifest`); updated `layout.tsx` + `sw.js` references.
+- P4.7 ✅ `tests/e2e/a11y.spec.ts` — axe on 3 pages × 2 themes + theme-choice-persists-across-reload. `tests/global-setup.ts` truncates `rate_limits` before e2e; signup limit raised to 20/hr (shared-IP realism).
+- Gate: `next build` ✅ · `tsc --noEmit` ✅ · `eslint` ✅ (5 pre-existing warnings) · `vitest` 40/40 ✅ · `playwright` 19/19 ✅.
+- **Not done:** `ComparisonSlider` velocity handoff (already 1:1 pointer-tracked — left as-is); `Header` still links to non-existent `/features`, `/privacy`, `/terms`, `/contact` (pre-existing; stub pages are out of scope here).
+
 ### P4.1 Tokenize palette  → (none)
 
 - Move the brand hexes (`#F9F7F4`, `#C6B8A4`, `#8A9A7B`, `#B87A7A`, `#C4A484`, `#1C1C1C`, `#6B6560`, `#E8E2DA`, …) into Tailwind v4 `@theme` in `src/app/globals.css` as semantic tokens (`--color-bg`, `--color-surface`, `--color-accent`, `--color-success`, `--color-error`, `--color-warn`, `--color-text`, `--color-muted`, `--color-border`).

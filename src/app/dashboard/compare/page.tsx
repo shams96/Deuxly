@@ -105,19 +105,19 @@ export default function ComparePage() {
   }, [searchParams, session?.user?.subscriptionStatus, runAnalysis]);
 
   if (status === "loading") {
-    return <div className="py-12 text-center text-[#6B6560]">Loading…</div>;
+    return <div className="py-12 text-center text-ink-2">Loading…</div>;
   }
 
   if (!photoA || !photoB) {
     return (
       <div className="space-y-4">
-        <h1 className="mb-1 text-2xl font-semibold text-[#1C1C1C]">Compare</h1>
-        <p className="text-sm text-[#6B6560]">
+        <h1 className="mb-1 text-2xl font-semibold text-ink">Compare</h1>
+        <p className="text-sm text-ink-2">
           Select two photos from your history to compare.
         </p>
         <Link
           href="/dashboard/history"
-          className="inline-block rounded-xl bg-[#C6B8A4] px-6 py-3 font-medium text-white transition-colors hover:bg-[#B8A892]"
+          className="inline-block rounded-xl bg-accent px-6 py-3 font-medium text-on-fill transition-colors hover:bg-accent-strong"
         >
           Go to History
         </Link>
@@ -128,8 +128,8 @@ export default function ComparePage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="mb-1 text-2xl font-semibold text-[#1C1C1C]">Compare</h1>
-        <p className="text-sm text-[#6B6560]">
+        <h1 className="mb-1 text-2xl font-semibold text-ink">Compare</h1>
+        <p className="text-sm text-ink-2">
           {photoA.label} vs {photoB.label}
         </p>
       </div>
@@ -142,14 +142,14 @@ export default function ComparePage() {
       />
 
       {status === "analyzing" && (
-        <div className="flex items-center gap-3 rounded-xl border border-[#E8E2DA] bg-white p-4 text-sm text-[#6B6560]">
-          <span className="h-4 w-4 animate-spin rounded-full border-2 border-[#C6B8A4] border-t-transparent" />
+        <div className="flex items-center gap-3 rounded-xl border border-line bg-surface p-4 text-sm text-ink-2">
+          <span className="h-4 w-4 animate-spin rounded-full border-2 border-accent border-t-transparent" />
           Analysing skin zones…
         </div>
       )}
 
       {status === "no-face" && (
-        <div className="rounded-xl border border-[#E8E2DA] bg-[#F3F0EB] p-4 text-sm text-[#6B6560]">
+        <div className="rounded-xl border border-line bg-surface-2 p-4 text-sm text-ink-2">
           Couldn&apos;t detect a face in one of these photos, so no zone analysis
           is available. The side-by-side comparison above still works.
         </div>
@@ -160,12 +160,12 @@ export default function ComparePage() {
           {overlayZones.length > 0 && (
             <>
               <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-[#1C1C1C]">
+                <h3 className="text-lg font-semibold text-ink">
                   Zone analysis
                 </h3>
                 <button
                   onClick={() => setShowOverlay((v) => !v)}
-                  className="text-sm text-[#C6B8A4] transition-colors hover:text-[#B8A892]"
+                  className="text-sm text-accent-ink transition-colors hover:text-accent-ink"
                 >
                   {showOverlay ? "Hide" : "Show"} overlay
                 </button>
@@ -179,11 +179,11 @@ export default function ComparePage() {
           <AnalysisSummary analysis={analysis} />
 
           {!isPremium && (
-            <p className="text-xs text-[#9C958D]">
+            <p className="text-xs text-ink-3">
               Free plan shows a summary only.{" "}
               <Link
                 href="/dashboard/settings?tab=subscription"
-                className="font-medium text-[#C6B8A4] hover:text-[#B8A892]"
+                className="font-medium text-accent-ink hover:text-accent-ink"
               >
                 Upgrade
               </Link>{" "}

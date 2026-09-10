@@ -24,8 +24,8 @@ export default function ProtectedRoute({
 
   if (status === "loading") {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#F9F7F4]">
-        <div className="w-8 h-8 border-2 border-[#C6B8A4] border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen flex items-center justify-center bg-bg">
+        <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -38,19 +38,19 @@ export default function ProtectedRoute({
 
   if (requirePremium && !isPremium) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#F9F7F4] px-4">
+      <div className="min-h-screen flex items-center justify-center bg-bg px-4">
         <div className="w-full max-w-sm text-center">
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-[#E8E2DA]">
-            <h2 className="text-xl font-semibold text-[#1C1C1C] mb-2">
+          <div className="bg-surface rounded-2xl p-6 shadow-sm border border-line">
+            <h2 className="text-xl font-semibold text-ink mb-2">
               Premium Feature
             </h2>
-            <p className="text-sm text-[#6B6560] mb-6">
+            <p className="text-sm text-ink-2 mb-6">
               This feature is available to premium subscribers. Upgrade your
               account to unlock exclusive skincare analysis tools.
             </p>
             <button
               onClick={() => router.push("/dashboard/settings?tab=subscription")}
-              className="w-full py-3 px-4 rounded-xl bg-[#C6B8A4] text-white font-medium hover:bg-[#B8A892] transition-colors"
+              className="w-full py-3 px-4 rounded-xl bg-accent text-on-fill font-medium hover:bg-accent-strong transition-colors"
             >
               Upgrade to Premium
             </button>

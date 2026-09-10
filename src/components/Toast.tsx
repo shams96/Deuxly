@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, useCallback, useRef, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 type Toast = {
   id: string;
@@ -51,29 +52,41 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   return (
     <ToastContext.Provider value={{ toasts, addToast, removeToast }}>
       {children}
-      <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2 max-w-sm w-full">
-        {toasts.map((toast) => (
-          <div
-            key={toast.id}
-            className={`p-4 rounded-xl shadow-lg border text-sm font-medium animate-in slide-in-from-bottom-2 ${
-              toast.type === "success"
-                ? "bg-[#8A9A7B]/10 border-[#8A9A7B]/30 text-[#8A9A7B]"
-                : toast.type === "error"
-                  ? "bg-[#B87A7A]/10 border-[#B87A7A]/30 text-[#B87A7A]"
-                  : "bg-white border-[#E8E2DA] text-[#1C1C1C]"
-            }`}
-          >
-            <div className="flex items-center justify-between gap-3">
-              <span>{toast.message}</span>
-              <button
-                onClick={() => removeToast(toast.id)}
-                className="text-current opacity-60 hover:opacity-100"
-              >
-                ✕
-              </button>
-            </div>
-          </div>
-        ))}
+      <div
+        className="fixed bottom-4 right-4 z-50 flex w-full max-w-sm flex-col gap-2"
+        role="status"
+        aria-live="polite"
+      >
+        <AnimatePresence initial={false}>
+          {toasts.map((toast) => (
+            <motion.div
+              key={toast.id}
+              layout
+              initial={{ opacity: 0, y: 20, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.96, transition: { duration: 0.15 } }}
+              transition={{ type: "spring", bounce: 0.2, duration: 0.4 }}
+              className={`rounded-xl border p-4 text-sm font-medium shadow-lg ${
+                toast.type === "success"
+                  ? "border-success/30 bg-success/10 text-success-ink"
+                  : toast.type === "error"
+                    ? "border-danger/30 bg-danger/10 text-danger-ink"
+                    : "border-line bg-surface text-ink"
+              }`}
+            >
+              <div className="flex items-center justify-between gap-3">
+                <span>{toast.message}</span>
+                <button
+                  onClick={() => removeToast(toast.id)}
+                  aria-label="Dismiss"
+                  className="text-current opacity-60 hover:opacity-100"
+                >
+                  <span aria-hidden>✕</span>
+                </button>
+              </div>
+            </motion.div>
+          ))}
+        </AnimatePresence>
       </div>
     </ToastContext.Provider>
   );

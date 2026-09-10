@@ -11,14 +11,14 @@ type Props = {
 };
 
 const STROKE: Record<OverlayZone["change"], string> = {
-  improved: "#8A9A7B",
-  worsened: "#B87A7A",
-  neutral: "#C6B8A4",
+  improved: "var(--color-success)",
+  worsened: "var(--color-danger)",
+  neutral: "var(--color-accent)",
 };
 const FILL: Record<OverlayZone["change"], string> = {
-  improved: "rgba(138,154,123,0.22)",
-  worsened: "rgba(184,122,122,0.22)",
-  neutral: "rgba(198,184,164,0.16)",
+  improved: "color-mix(in srgb, var(--color-success) 22%, transparent)",
+  worsened: "color-mix(in srgb, var(--color-danger) 22%, transparent)",
+  neutral: "color-mix(in srgb, var(--color-accent) 16%, transparent)",
 };
 
 const LABEL: Record<AnalysisZone, string> = {
@@ -34,7 +34,7 @@ export default function VisualOverlay({ imageUrl, zones }: Props) {
 
   return (
     <div>
-      <div className="relative aspect-[3/4] w-full overflow-hidden rounded-2xl bg-[#F9F7F4] shadow-sm">
+      <div className="relative aspect-[3/4] w-full overflow-hidden rounded-2xl bg-bg shadow-sm">
         <Image src={imageUrl} alt="Analysed baseline" fill className="object-cover" />
         <svg
           viewBox="0 0 1 1"
@@ -58,7 +58,7 @@ export default function VisualOverlay({ imageUrl, zones }: Props) {
         {zones.map((z) => (
           <span
             key={z.name}
-            className="inline-flex items-center gap-1.5 rounded-full border border-[#E8E2DA] bg-white px-2.5 py-1 text-xs font-medium"
+            className="inline-flex items-center gap-1.5 rounded-full border border-line bg-surface px-2.5 py-1 text-xs font-medium"
           >
             <span
               className="h-2.5 w-2.5 rounded-full"

@@ -12,7 +12,7 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "Deuxly",
   description: "The second look at your skin — properly framed.",
-  manifest: "/manifest.json",
+  manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
@@ -27,9 +27,15 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#C6B8A4",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f9f7f4" },
+    { media: "(prefers-color-scheme: dark)", color: "#17150f" },
+  ],
   viewportFit: "cover",
 };
+
+// Applied before first paint so a saved theme choice never flashes.
+const themeInit = `try{var t=localStorage.getItem("theme");if(t==="dark"||t==="light")document.documentElement.dataset.theme=t;}catch(e){}`;
 
 export default function RootLayout({
   children,
@@ -38,7 +44,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${inter.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col bg-[#F9F7F4] text-[#1C1C1C]">
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInit }} />
+      </head>
+      <body className="min-h-full flex flex-col bg-bg text-ink">
         <Providers>{children}</Providers>
       </body>
     </html>

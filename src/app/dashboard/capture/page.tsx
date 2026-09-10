@@ -10,8 +10,8 @@ export default async function CapturePage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold text-[#1C1C1C] mb-1">Capture</h1>
-        <p className="text-sm text-[#6B6560]">
+        <h1 className="text-2xl font-semibold text-ink mb-1">Capture</h1>
+        <p className="text-sm text-ink-2">
           Take a standardized photo for accurate tracking
         </p>
       </div>

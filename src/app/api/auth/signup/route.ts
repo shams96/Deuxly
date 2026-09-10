@@ -7,7 +7,8 @@ import { clientIp } from "@/lib/clientIp";
 export async function POST(request: Request) {
   try {
     const ip = clientIp(request);
-    if (!(await checkRateLimit(`signup:${ip}`, 5, 60 * 60_000))) {
+    // Shared IPs (CGNAT, offices) are common, so keep this generous.
+    if (!(await checkRateLimit(`signup:${ip}`, 20, 60 * 60_000))) {
       return NextResponse.json(
         { error: "Too many sign-up attempts. Try again later." },
         { status: 429 },

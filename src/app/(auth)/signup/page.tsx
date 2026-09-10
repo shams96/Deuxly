@@ -55,20 +55,20 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#F9F7F4] px-4">
+    <div className="min-h-screen flex items-center justify-center bg-bg px-4">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-semibold text-[#1C1C1C] mb-2">
+          <h1 className="text-2xl font-semibold text-ink mb-2">
             Create your account
           </h1>
-          <p className="text-sm text-[#6B6560]">
+          <p className="text-sm text-ink-2">
             Start your luxury skincare journey
           </p>
         </div>
 
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-[#E8E2DA]">
+        <div className="bg-surface rounded-2xl p-6 shadow-sm border border-line">
           {error && (
-            <div className="mb-4 p-3 rounded-lg bg-[#B87A7A]/10 text-[#B87A7A] text-sm">
+            <div className="mb-4 p-3 rounded-lg bg-danger/10 text-danger-ink text-sm">
               {error}
             </div>
           )}
@@ -77,7 +77,7 @@ export default function SignupPage() {
             <div>
               <label
                 htmlFor="name"
-                className="block text-sm font-medium text-[#1C1C1C] mb-1"
+                className="block text-sm font-medium text-ink mb-1"
               >
                 Name
               </label>
@@ -87,7 +87,7 @@ export default function SignupPage() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
-                className="w-full px-4 py-3 rounded-xl border border-[#E8E2DA] bg-white text-[#1C1C1C] placeholder-[#9C958D] focus:outline-none focus:ring-2 focus:ring-[#C6B8A4] focus:border-transparent transition-all"
+                className="w-full px-4 py-3 rounded-xl border border-line bg-surface text-ink placeholder-ink-3 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition-all"
                 placeholder="Jane Doe"
               />
             </div>
@@ -95,7 +95,7 @@ export default function SignupPage() {
             <div>
               <label
                 htmlFor="email"
-                className="block text-sm font-medium text-[#1C1C1C] mb-1"
+                className="block text-sm font-medium text-ink mb-1"
               >
                 Email
               </label>
@@ -105,7 +105,7 @@ export default function SignupPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full px-4 py-3 rounded-xl border border-[#E8E2DA] bg-white text-[#1C1C1C] placeholder-[#9C958D] focus:outline-none focus:ring-2 focus:ring-[#C6B8A4] focus:border-transparent transition-all"
+                className="w-full px-4 py-3 rounded-xl border border-line bg-surface text-ink placeholder-ink-3 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition-all"
                 placeholder="you@example.com"
               />
             </div>
@@ -113,7 +113,7 @@ export default function SignupPage() {
             <div>
               <label
                 htmlFor="password"
-                className="block text-sm font-medium text-[#1C1C1C] mb-1"
+                className="block text-sm font-medium text-ink mb-1"
               >
                 Password
               </label>
@@ -124,7 +124,7 @@ export default function SignupPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 minLength={8}
-                className="w-full px-4 py-3 rounded-xl border border-[#E8E2DA] bg-white text-[#1C1C1C] placeholder-[#9C958D] focus:outline-none focus:ring-2 focus:ring-[#C6B8A4] focus:border-transparent transition-all"
+                className="w-full px-4 py-3 rounded-xl border border-line bg-surface text-ink placeholder-ink-3 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition-all"
                 placeholder="••••••••"
               />
             </div>
@@ -132,7 +132,7 @@ export default function SignupPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-3 px-4 rounded-xl bg-[#C6B8A4] text-white font-medium hover:bg-[#B8A892] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="w-full py-3 px-4 rounded-xl bg-accent text-on-fill font-medium hover:bg-accent-strong disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               {isLoading ? "Creating account..." : "Create account"}
             </button>
@@ -141,10 +141,10 @@ export default function SignupPage() {
           <div className="mt-6">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-[#E8E2DA]" />
+                <div className="w-full border-t border-line" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-[#9C958D]">
+                <span className="px-2 bg-surface text-ink-3">
                   Or continue with
                 </span>
               </div>
@@ -153,7 +153,7 @@ export default function SignupPage() {
             <div className="mt-4 grid grid-cols-2 gap-3">
               <button
                 onClick={() => signIn("google", { callbackUrl: "/" })}
-                className="flex items-center justify-center gap-2 py-3 px-4 rounded-xl border border-[#E8E2DA] bg-white text-[#1C1C1C] font-medium hover:bg-[#F3F0EB] transition-colors"
+                className="flex items-center justify-center gap-2 py-3 px-4 rounded-xl border border-line bg-surface text-ink font-medium hover:bg-surface-2 transition-colors"
               >
                 <svg className="w-5 h-5" viewBox="0 0 24 24">
                   <path
@@ -178,7 +178,7 @@ export default function SignupPage() {
 
               <button
                 onClick={() => signIn("apple", { callbackUrl: "/" })}
-                className="flex items-center justify-center gap-2 py-3 px-4 rounded-xl border border-[#E8E2DA] bg-white text-[#1C1C1C] font-medium hover:bg-[#F3F0EB] transition-colors"
+                className="flex items-center justify-center gap-2 py-3 px-4 rounded-xl border border-line bg-surface text-ink font-medium hover:bg-surface-2 transition-colors"
               >
                 <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
@@ -189,11 +189,11 @@ export default function SignupPage() {
           </div>
         </div>
 
-        <p className="mt-6 text-center text-sm text-[#6B6560]">
+        <p className="mt-6 text-center text-sm text-ink-2">
           Already have an account?{" "}
           <Link
             href="/login"
-            className="font-medium text-[#C6B8A4] hover:text-[#B8A892] transition-colors"
+            className="font-medium text-accent-ink hover:text-accent-ink transition-colors"
           >
             Sign in
           </Link>

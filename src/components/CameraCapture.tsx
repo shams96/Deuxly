@@ -100,13 +100,13 @@ export default function CameraCapture({ onCapture }: Props) {
   function getDistanceColor(state: DistanceState): string {
     switch (state) {
       case "too_close":
-        return "#B87A7A";
+        return "var(--color-danger)";
       case "too_far":
-        return "#C4A484";
+        return "var(--color-warning)";
       case "good":
-        return "#8A9A7B";
+        return "var(--color-success)";
       default:
-        return "#C6B8A4";
+        return "var(--color-accent)";
     }
   }
 
@@ -355,25 +355,25 @@ export default function CameraCapture({ onCapture }: Props) {
   if (phase === "review" && preview) {
     return (
       <div className="space-y-4">
-        <div className="aspect-[3/4] w-full overflow-hidden rounded-2xl bg-[#F9F7F4] shadow-sm relative">
+        <div className="aspect-[3/4] w-full overflow-hidden rounded-2xl bg-bg shadow-sm relative">
           <Image src={preview} alt="Preview" fill className="object-cover" />
         </div>
 
-        <div className="p-4 rounded-xl bg-[#8A9A7B]/10 border border-[#8A9A7B]/20">
+        <div className="p-4 rounded-xl bg-success/10 border border-success/20">
           <div className="flex items-center gap-2 mb-2">
-            <span className="text-[#8A9A7B] text-lg">✓</span>
-            <span className="text-sm font-medium text-[#1C1C1C]">Photo captured!</span>
+            <span className="text-success-ink text-lg">✓</span>
+            <span className="text-sm font-medium text-ink">Photo captured!</span>
           </div>
-          <p className="text-xs text-[#6B6560]">Review your photo above. If it looks good, add details and save. Otherwise, retake it.</p>
+          <p className="text-xs text-ink-2">Review your photo above. If it looks good, add details and save. Otherwise, retake it.</p>
         </div>
 
         <div className="space-y-3">
           <div>
-            <label className="block text-sm font-medium text-[#1C1C1C] mb-1">Label</label>
+            <label className="block text-sm font-medium text-ink mb-1">Label</label>
             <select
               value={label}
               onChange={(e) => setLabel(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border border-[#E8E2DA] bg-white text-sm text-[#1C1C1C]"
+              className="w-full px-4 py-3 rounded-xl border border-line bg-surface text-sm text-ink"
             >
               <option>Baseline</option>
               <option>Week 4</option>
@@ -382,30 +382,30 @@ export default function CameraCapture({ onCapture }: Props) {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-[#1C1C1C] mb-1">Notes</label>
+            <label className="block text-sm font-medium text-ink mb-1">Notes</label>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               rows={2}
-              className="w-full px-4 py-3 rounded-xl border border-[#E8E2DA] bg-white text-sm text-[#1C1C1C] resize-none"
+              className="w-full px-4 py-3 rounded-xl border border-line bg-surface text-sm text-ink resize-none"
               placeholder="Optional notes about this photo..."
             />
           </div>
           {saveError && (
-            <div className="p-3 rounded-lg bg-[#B87A7A]/10 text-[#B87A7A] text-sm">{saveError}</div>
+            <div className="p-3 rounded-lg bg-danger/10 text-danger-ink text-sm">{saveError}</div>
           )}
           <div className="flex gap-3">
             <button
               onClick={retake}
               disabled={saving}
-              className="flex-1 py-3 rounded-xl border border-[#E8E2DA] text-[#1C1C1C] font-medium hover:bg-[#F3F0EB] transition-colors disabled:opacity-50"
+              className="flex-1 py-3 rounded-xl border border-line text-ink font-medium hover:bg-surface-2 transition-colors disabled:opacity-50"
             >
               Retake
             </button>
             <button
               onClick={handleSave}
               disabled={saving}
-              className="flex-1 py-3 rounded-xl bg-[#C6B8A4] text-white font-medium hover:bg-[#B8A892] transition-colors disabled:opacity-50"
+              className="flex-1 py-3 rounded-xl bg-accent text-on-fill font-medium hover:bg-accent-strong transition-colors disabled:opacity-50"
             >
               {saving ? "Saving..." : "Save Photo"}
             </button>
@@ -418,58 +418,58 @@ export default function CameraCapture({ onCapture }: Props) {
   if (phase === "setup") {
     return (
       <div className="space-y-4">
-        <div className="p-5 rounded-2xl bg-white border border-[#E8E2DA]">
-          <h3 className="text-base font-semibold text-[#1C1C1C] mb-3">Prepare for your photo</h3>
-          <ol className="space-y-3 text-sm text-[#6B6560]">
+        <div className="p-5 rounded-2xl bg-surface border border-line">
+          <h3 className="text-base font-semibold text-ink mb-3">Prepare for your photo</h3>
+          <ol className="space-y-3 text-sm text-ink-2">
             <li className="flex items-start gap-3">
-              <span className="mt-0.5 w-5 h-5 rounded-full bg-[#EDE6DC] text-[#C6B8A4] text-xs flex items-center justify-center font-medium shrink-0">1</span>
+              <span className="mt-0.5 w-5 h-5 rounded-full bg-accent-soft text-accent-ink text-xs flex items-center justify-center font-medium shrink-0">1</span>
               <span>Find a <strong>well-lit area</strong>. Natural light from a window works best. Avoid harsh shadows on your face.</span>
             </li>
             <li className="flex items-start gap-3">
-              <span className="mt-0.5 w-5 h-5 rounded-full bg-[#EDE6DC] text-[#C6B8A4] text-xs flex items-center justify-center font-medium shrink-0">2</span>
+              <span className="mt-0.5 w-5 h-5 rounded-full bg-accent-soft text-accent-ink text-xs flex items-center justify-center font-medium shrink-0">2</span>
               <span>Hold your phone about <strong>2 feet</strong> from your face. You should be able to see your whole face comfortably in the frame.</span>
             </li>
             <li className="flex items-start gap-3">
-              <span className="mt-0.5 w-5 h-5 rounded-full bg-[#EDE6DC] text-[#C6B8A4] text-xs flex items-center justify-center font-medium shrink-0">3</span>
+              <span className="mt-0.5 w-5 h-5 rounded-full bg-accent-soft text-accent-ink text-xs flex items-center justify-center font-medium shrink-0">3</span>
               <span>Use a <strong>neutral expression</strong> — relax your face and look directly at the camera. No big smiles or frowns.</span>
             </li>
             <li className="flex items-start gap-3">
-              <span className="mt-0.5 w-5 h-5 rounded-full bg-[#EDE6DC] text-[#C6B8A4] text-xs flex items-center justify-center font-medium shrink-0">4</span>
+              <span className="mt-0.5 w-5 h-5 rounded-full bg-accent-soft text-accent-ink text-xs flex items-center justify-center font-medium shrink-0">4</span>
               <span>Remove <strong>glasses, hats, or anything</strong> covering your face for the clearest result.</span>
             </li>
           </ol>
         </div>
 
         {!faceDetectorSupported && (
-          <div className="p-3 rounded-xl bg-[#F3F0EB] border border-[#E8E2DA]">
-            <p className="text-xs text-[#6B6560]">
+          <div className="p-3 rounded-xl bg-surface-2 border border-line">
+            <p className="text-xs text-ink-2">
               Automatic face detection couldn&apos;t start on this device. The app will use guided positioning instead — line your face up with the oval.
             </p>
           </div>
         )}
 
-        <div className="p-4 rounded-xl bg-[#F3F0EB] border border-[#E8E2DA]">
+        <div className="p-4 rounded-xl bg-surface-2 border border-line">
           <label className="flex items-center gap-3 cursor-pointer">
             <input
               type="checkbox"
               checked={lightingOk}
               onChange={(e) => setLightingOk(e.target.checked)}
-              className="w-5 h-5 rounded border-[#C6B8A4] text-[#C6B8A4] focus:ring-[#C6B8A4]"
+              className="w-5 h-5 rounded border-accent text-accent-ink focus:ring-accent"
             />
-            <span className="text-sm text-[#1C1C1C]">My face is well-lit and I can see the camera clearly</span>
+            <span className="text-sm text-ink">My face is well-lit and I can see the camera clearly</span>
           </label>
         </div>
 
         <button
           onClick={handleStartCapture}
           disabled={!lightingOk}
-          className="w-full py-4 rounded-2xl bg-[#C6B8A4] text-white font-medium hover:bg-[#B8A892] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full py-4 rounded-2xl bg-accent text-on-fill font-medium hover:bg-accent-strong transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Start Camera
         </button>
 
         {!lightingOk && (
-          <p className="text-xs text-center text-[#9C958D]">Please confirm your lighting before continuing</p>
+          <p className="text-xs text-center text-ink-3">Please confirm your lighting before continuing</p>
         )}
       </div>
     );
@@ -478,10 +478,10 @@ export default function CameraCapture({ onCapture }: Props) {
   return (
     <div className="space-y-4">
       {error && (
-        <div className="p-4 rounded-xl bg-[#B87A7A]/10 text-[#B87A7A] text-sm">{error}</div>
+        <div className="p-4 rounded-xl bg-danger/10 text-danger-ink text-sm">{error}</div>
       )}
 
-      <div className="relative aspect-[3/4] w-full overflow-hidden rounded-2xl bg-[#1C1C1C] shadow-sm">
+      <div className="relative aspect-[3/4] w-full overflow-hidden rounded-2xl bg-ink shadow-sm">
         <video
           ref={videoRef}
           autoPlay
@@ -493,15 +493,15 @@ export default function CameraCapture({ onCapture }: Props) {
 
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none" style={{ padding: "env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)" }}>
           <div className="relative w-[65%] aspect-[3/4]">
-            <div className="absolute inset-0 border-2 border-[#C6B8A4] rounded-full opacity-80" />
+            <div className="absolute inset-0 border-2 border-accent rounded-full opacity-80" />
             <div className="absolute -top-10 left-1/2 -translate-x-1/2 whitespace-nowrap">
-              <span className="text-xs text-[#C6B8A4] bg-[#1C1C1C]/80 px-3 py-1.5 rounded-full backdrop-blur-sm font-medium">
+              <span className="text-xs text-accent-ink bg-ink/80 px-3 py-1.5 rounded-full backdrop-blur-sm font-medium">
                 Position face here
               </span>
             </div>
 
             <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 whitespace-nowrap">
-              <span className="text-[10px] text-[#C6B8A4]/80 bg-[#1C1C1C]/60 px-2 py-1 rounded-full backdrop-blur-sm">
+              <span className="text-[10px] text-accent-ink/80 bg-ink/60 px-2 py-1 rounded-full backdrop-blur-sm">
                 ~2 feet away
               </span>
             </div>
@@ -518,7 +518,7 @@ export default function CameraCapture({ onCapture }: Props) {
 
         {faceDetectorSupported && distanceState === "good" && (
           <div className="absolute top-4 left-4 right-4">
-            <div className="p-2 rounded-lg bg-[#8A9A7B]/90 backdrop-blur-sm text-center">
+            <div className="p-2 rounded-lg bg-success/90 backdrop-blur-sm text-center">
               <p className="text-xs text-white font-medium">Ready! Photo will be taken automatically...</p>
             </div>
           </div>
@@ -537,8 +537,8 @@ export default function CameraCapture({ onCapture }: Props) {
 
         {detectorActive && !allConditionsMet && distanceState !== "good" && (
           <div className="absolute bottom-4 left-4 right-4">
-            <div className="p-3 rounded-xl bg-[#1C1C1C]/90 backdrop-blur-sm border border-[#C6B8A4]/30">
-              <p className="text-xs text-[#C6B8A4] font-medium mb-1">Adjusting:</p>
+            <div className="p-3 rounded-xl bg-ink/90 backdrop-blur-sm border border-accent/30">
+              <p className="text-xs text-accent-ink font-medium mb-1">Adjusting:</p>
               <p className="text-xs text-white/90">
                 {quality.find((c) => !c.met)?.instruction || "Follow the guide above to position your face correctly"}
               </p>
@@ -548,27 +548,27 @@ export default function CameraCapture({ onCapture }: Props) {
       </div>
 
       {detectorActive && distanceState !== "unknown" && (
-        <div className="p-3 rounded-xl bg-white border border-[#E8E2DA]">
+        <div className="p-3 rounded-xl bg-surface border border-line">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-medium text-[#1C1C1C]">Distance</span>
+            <span className="text-xs font-medium text-ink">Distance</span>
             <span className="text-xs font-medium" style={{ color: getDistanceColor(distanceState) }}>
               {getDistanceLabel(distanceState)}
             </span>
           </div>
-          <div className="w-full h-2 bg-[#F3F0EB] rounded-full overflow-hidden">
+          <div className="w-full h-2 bg-surface-2 rounded-full overflow-hidden">
             <div className="h-full rounded-full transition-all duration-300" style={{ width: distanceState === "good" ? "100%" : distanceState === "too_close" ? "80%" : "30%", backgroundColor: getDistanceColor(distanceState) }} />
           </div>
           <div className="flex justify-between mt-1">
-            <span className="text-[10px] text-[#9C958D]">Too close</span>
-            <span className="text-[10px] text-[#9C958D]">~2 feet</span>
-            <span className="text-[10px] text-[#9C958D]">Too far</span>
+            <span className="text-[10px] text-ink-3">Too close</span>
+            <span className="text-[10px] text-ink-3">~2 feet</span>
+            <span className="text-[10px] text-ink-3">Too far</span>
           </div>
         </div>
       )}
 
       {!detectorActive && (
-        <div className="p-3 rounded-xl bg-[#F3F0EB] border border-[#E8E2DA]">
-          <p className="text-xs text-[#6B6560] text-center">
+        <div className="p-3 rounded-xl bg-surface-2 border border-line">
+          <p className="text-xs text-ink-2 text-center">
             Automatic face detection is unavailable. Position your face in the oval and tap Capture below.
           </p>
         </div>
@@ -581,7 +581,7 @@ export default function CameraCapture({ onCapture }: Props) {
           <div
             key={c.label}
             className={`flex items-center gap-2 p-2 rounded-lg text-xs ${
-              c.met ? "bg-[#8A9A7B]/10 text-[#8A9A7B]" : "bg-[#F3F0EB] text-[#6B6560]"
+              c.met ? "bg-success/10 text-success-ink" : "bg-surface-2 text-on-fill-2"
             }`}
           >
             <span>{c.met ? "✓" : "○"}</span>
@@ -594,7 +594,7 @@ export default function CameraCapture({ onCapture }: Props) {
         <select
           value={label}
           onChange={(e) => setLabel(e.target.value)}
-          className="px-4 py-2 rounded-xl border border-[#E8E2DA] bg-white text-sm text-[#1C1C1C]"
+          className="px-4 py-2 rounded-xl border border-line bg-surface text-sm text-ink"
         >
           <option>Baseline</option>
           <option>Week 4</option>
@@ -604,7 +604,7 @@ export default function CameraCapture({ onCapture }: Props) {
 
         <button
           onClick={() => setFacing(facing === "user" ? "environment" : "user")}
-          className="p-2 rounded-full bg-white border border-[#E8E2DA] text-[#1C1C1C] hover:bg-[#F3F0EB] transition-colors"
+          className="p-2 rounded-full bg-surface border border-line text-ink hover:bg-surface-2 transition-colors"
         >
           Flip
         </button>
@@ -615,17 +615,17 @@ export default function CameraCapture({ onCapture }: Props) {
         disabled={detectorActive ? (!allConditionsMet && countdown === null) : false}
         className={`w-full py-4 rounded-2xl font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
           countdown !== null
-            ? "bg-[#B87A7A] text-white hover:bg-[#A86A6A]"
+            ? "bg-danger text-on-fill hover:bg-danger-strong"
             : detectorActive
-              ? (allConditionsMet ? "bg-[#8A9A7B] text-white hover:bg-[#7A8A6B]" : "bg-[#C6B8A4] text-white hover:bg-[#B8A892]")
-              : "bg-[#C6B8A4] text-white hover:bg-[#B8A892]"
+              ? (allConditionsMet ? "bg-success text-on-fill hover:bg-success-strong" : "bg-accent text-on-fill hover:bg-accent-strong")
+              : "bg-accent text-on-fill hover:bg-accent-strong"
         }`}
       >
         {countdown !== null ? `Cancel (${countdown})` : detectorActive ? (allConditionsMet ? "Capturing..." : "Complete all checks to capture") : "Capture Photo"}
       </button>
 
       {!isPremium && (
-        <p className="text-xs text-center text-[#9C958D]">
+        <p className="text-xs text-center text-ink-3">
           Free tier: 4 captures/month. Upgrade for unlimited captures.
         </p>
       )}
