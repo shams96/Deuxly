@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useSession } from "next-auth/react";
-import { signOut } from "next-auth/react";
+import { signOut } from "@/lib/signOut";
 
 type Tab = "subscription" | "account";
 
@@ -34,9 +34,34 @@ export default function SettingsPage() {
   };
 
   const handleDeleteAccount = async () => {
-    if (!confirm("Are you sure? This will delete all your data permanently.")) return;
-    await fetch("/api/auth/delete-account", { method: "POST" });
-    signOut({ callbackUrl: "/" });
+    const currentEmail = session?.user?.email ?? "";
+    const typed = window.prompt(
+      `This permanently deletes your account, photos and analyses.\n\nType your email (${currentEmail}) to confirm:`,
+    );
+    if (!typed) return;
+
+    setLoading(true);
+    try {
+      const start = await fetch("/api/auth/delete-account", { method: "POST" });
+      if (!start.ok) {
+        alert("Could not start account deletion. Please try again.");
+        return;
+      }
+      const { token } = await start.json();
+      const res = await fetch("/api/auth/delete-account", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token, confirmEmail: typed }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        alert(data.error || "Account deletion failed.");
+        return;
+      }
+      signOut({ callbackUrl: "/" });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

@@ -35,6 +35,16 @@ export async function POST(request: Request) {
       );
     }
 
+    // Idempotency: Stripe retries deliver the same event id. Claim it first;
+    // a duplicate is acknowledged without reprocessing.
+    try {
+      await prisma.webhookEvent.create({
+        data: { id: event.id, type: event.type },
+      });
+    } catch {
+      return NextResponse.json({ received: true, duplicate: true });
+    }
+
     switch (event.type) {
       case "checkout.session.completed": {
         const session = event.data.object as unknown as {
@@ -95,6 +105,15 @@ export async function POST(request: Request) {
             subscriptionStatus,
             stripeSubscriptionId: subscription.id,
           },
+        });
+        break;
+      }
+
+      case "invoice.payment_failed": {
+        const invoice = event.data.object as unknown as { customer: string };
+        await prisma.user.updateMany({
+          where: { stripeCustomerId: invoice.customer },
+          data: { subscriptionStatus: "free" },
         });
         break;
       }

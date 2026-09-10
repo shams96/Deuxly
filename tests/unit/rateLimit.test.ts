@@ -1,28 +1,50 @@
-import { describe, it, expect } from "vitest";
-import { checkRateLimit } from "@/lib/rateLimit";
+import { describe, it, expect, vi, beforeEach } from "vitest";
+
+const queryRaw = vi.fn();
+const deleteMany = vi.fn().mockResolvedValue({ count: 0 });
+
+vi.mock("@/lib/prisma", () => ({
+  prisma: {
+    $queryRaw: (...args: unknown[]) => queryRaw(...args),
+    rateLimit: { deleteMany: (...args: unknown[]) => deleteMany(...args) },
+  },
+}));
+
+const { checkRateLimit } = await import("@/lib/rateLimit");
+
+beforeEach(() => {
+  queryRaw.mockReset();
+  deleteMany.mockClear();
+});
 
 describe("checkRateLimit", () => {
-  it("allows up to max within the window, then blocks", () => {
-    const key = `t-${Math.random()}`;
-    for (let i = 0; i < 3; i++) {
-      expect(checkRateLimit(key, 3, 60_000)).toBe(true);
-    }
-    expect(checkRateLimit(key, 3, 60_000)).toBe(false);
+  it("allows while the window count is within max", async () => {
+    queryRaw.mockResolvedValueOnce([{ count: 3 }]);
+    expect(await checkRateLimit("k", 5, 60_000)).toBe(true);
   });
 
-  it("isolates counts per key", () => {
-    const a = `a-${Math.random()}`;
-    const b = `b-${Math.random()}`;
-    expect(checkRateLimit(a, 1, 60_000)).toBe(true);
-    expect(checkRateLimit(a, 1, 60_000)).toBe(false);
-    expect(checkRateLimit(b, 1, 60_000)).toBe(true);
+  it("blocks once the window count exceeds max", async () => {
+    queryRaw.mockResolvedValueOnce([{ count: 6 }]);
+    expect(await checkRateLimit("k", 5, 60_000)).toBe(false);
   });
 
-  it("resets after the window elapses", async () => {
-    const key = `w-${Math.random()}`;
-    expect(checkRateLimit(key, 1, 10)).toBe(true);
-    expect(checkRateLimit(key, 1, 10)).toBe(false);
-    await new Promise((r) => setTimeout(r, 20));
-    expect(checkRateLimit(key, 1, 10)).toBe(true);
+  it("treats the boundary (count === max) as allowed", async () => {
+    queryRaw.mockResolvedValueOnce([{ count: 5 }]);
+    expect(await checkRateLimit("k", 5, 60_000)).toBe(true);
+  });
+
+  it("fails open when the store is unreachable", async () => {
+    queryRaw.mockRejectedValueOnce(new Error("db down"));
+    expect(await checkRateLimit("k", 1, 60_000)).toBe(true);
+  });
+
+  it("passes the key and a future reset timestamp to the query", async () => {
+    queryRaw.mockResolvedValueOnce([{ count: 1 }]);
+    const before = Date.now();
+    await checkRateLimit("upload:user-1", 10, 60_000);
+    const params = queryRaw.mock.calls[0].slice(1) as unknown[];
+    expect(params).toContain("upload:user-1");
+    const reset = params.find((p) => p instanceof Date) as Date;
+    expect(reset.getTime()).toBeGreaterThan(before);
   });
 });

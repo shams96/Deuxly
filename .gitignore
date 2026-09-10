@@ -48,5 +48,6 @@ next-env.d.ts
 prisma/*.db
 prisma/**/*.db
 
-# local storage fallback when R2 is not configured (removed in Phase 3)
+# private local object storage (used when R2 is not configured)
+/.data
 /public/uploads

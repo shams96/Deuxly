@@ -53,6 +53,7 @@ model User {
   sessions      Session[]
   photos        Photo[]
   analyses      Analysis[]
+  deletionToken AccountDeletionToken?
 
   @@map("users")
 }
@@ -73,6 +74,7 @@ model Photo {
   notes       String?
   storageUrl  String    @map("storage_url")
   thumbnailUrl String?  @map("thumbnail_url")
+  contentType String    @default("image/jpeg") @map("content_type")
   capturedAt  DateTime  @default(now()) @map("captured_at")
   metadata    String?
   width       Int?
@@ -99,4 +101,36 @@ model Analysis {
   photoB Photo  @relation("PhotoB", fields: [photoBId], references: [id], onDelete: Cascade)
 
   @@map("analyses")
+}
+
+/// Fixed-window rate limiting. One row per (bucket, subject); survives
+/// serverless cold starts unlike an in-process map.
+model RateLimit {
+  key     String   @id
+  count   Int      @default(0)
+  resetAt DateTime @map("reset_at")
+
+  @@index([resetAt])
+  @@map("rate_limits")
+}
+
+/// Processed Stripe webhook event ids — replay/duplicate guard.
+model WebhookEvent {
+  id          String   @id
+  type        String
+  processedAt DateTime @default(now()) @map("processed_at")
+
+  @@map("webhook_events")
+}
+
+/// Short-lived token that must be presented to actually delete an account.
+model AccountDeletionToken {
+  token     String   @id
+  userId    String   @unique @map("user_id")
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("account_deletion_tokens")
 }

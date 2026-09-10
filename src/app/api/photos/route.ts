@@ -2,8 +2,21 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { uploadToStorage } from "@/lib/storage";
+import { makeKey, putObject } from "@/lib/storage";
 import { checkRateLimit } from "@/lib/rateLimit";
+import { validateAndNormalizeImage, MAX_UPLOAD_BYTES } from "@/lib/imageValidation";
+import { withPhotoUrls } from "@/lib/photoUrls";
+
+const LIST_SELECT = {
+  id: true,
+  label: true,
+  notes: true,
+  capturedAt: true,
+  thumbnailUrl: true,
+  width: true,
+  height: true,
+  fileSize: true,
+} as const;
 
 export async function GET(request: Request) {
   try {
@@ -13,8 +26,8 @@ export async function GET(request: Request) {
     }
 
     const url = new URL(request.url);
-    const limit = parseInt(url.searchParams.get("limit") ?? "50", 10);
-    const offset = parseInt(url.searchParams.get("offset") ?? "0", 10);
+    const limit = Math.min(100, Math.max(1, parseInt(url.searchParams.get("limit") ?? "50", 10) || 50));
+    const offset = Math.max(0, parseInt(url.searchParams.get("offset") ?? "0", 10) || 0);
 
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
@@ -34,26 +47,13 @@ export async function GET(request: Request) {
       orderBy: { capturedAt: "desc" },
       take: limit,
       skip: offset,
-      select: {
-        id: true,
-        label: true,
-        notes: true,
-        capturedAt: true,
-        storageUrl: true,
-        thumbnailUrl: true,
-        width: true,
-        height: true,
-        fileSize: true,
-      },
+      select: LIST_SELECT,
     });
 
-    return NextResponse.json({ photos });
+    return NextResponse.json({ photos: photos.map(withPhotoUrls) });
   } catch (error) {
     console.error("GET /api/photos error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
@@ -63,20 +63,24 @@ export async function POST(request: Request) {
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-
     const userId = session.user.id;
-    if (!checkRateLimit(`upload:${userId}`, 10, 60_000)) {
+
+    if (!(await checkRateLimit(`upload:${userId}`, 10, 60_000))) {
       return NextResponse.json(
         { error: "Too many requests. Please try again later." },
-        { status: 429 }
+        { status: 429 },
       );
+    }
+
+    const declaredLength = Number(request.headers.get("content-length") ?? 0);
+    if (declaredLength > MAX_UPLOAD_BYTES + 1_000_000) {
+      return NextResponse.json({ error: "Upload too large" }, { status: 413 });
     }
 
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select: { subscriptionStatus: true },
     });
-
     const isPremium = user?.subscriptionStatus === "premium";
     if (!isPremium) {
       const monthStart = new Date();
@@ -88,110 +92,58 @@ export async function POST(request: Request) {
       if (monthlyCount >= 4) {
         return NextResponse.json(
           { error: "Monthly limit reached. Upgrade to Premium for unlimited captures." },
-          { status: 403 }
+          { status: 403 },
         );
       }
     }
 
     const formData = await request.formData();
-    const file = formData.get("image") as File | null;
-    const label = (formData.get("label") as string) ?? "";
-    const notes = (formData.get("notes") as string) ?? null;
+    const file = formData.get("image");
+    const label = ((formData.get("label") as string) ?? "").trim();
+    const notes = ((formData.get("notes") as string) ?? "").trim() || null;
 
-    if (!file) {
-      return NextResponse.json(
-        { error: "Image file is required" },
-        { status: 400 }
-      );
+    if (!(file instanceof File)) {
+      return NextResponse.json({ error: "Image file is required" }, { status: 400 });
+    }
+    if (!label) {
+      return NextResponse.json({ error: "Label is required" }, { status: 400 });
+    }
+    if (label.length > 120 || (notes?.length ?? 0) > 2000) {
+      return NextResponse.json({ error: "Label or notes too long" }, { status: 400 });
+    }
+    if (file.size > MAX_UPLOAD_BYTES) {
+      return NextResponse.json({ error: "Image is larger than 12 MB" }, { status: 413 });
     }
 
-    if (!label.trim()) {
-      return NextResponse.json(
-        { error: "Label is required" },
-        { status: 400 }
-      );
+    const raw = Buffer.from(await file.arrayBuffer());
+    const result = await validateAndNormalizeImage(raw);
+    if (!result.ok) {
+      return NextResponse.json({ error: result.error }, { status: result.status });
     }
 
-    const buffer = Buffer.from(await file.arrayBuffer());
-    let processedBuffer = buffer;
-    let thumbnailBuffer: Buffer | undefined;
-    let width = 0;
-    let height = 0;
-
-    try {
-      const sharp = await import("sharp");
-      const metadata = await sharp.default(buffer).metadata();
-      width = metadata.width ?? 0;
-      height = metadata.height ?? 0;
-
-      processedBuffer = await sharp
-        .default(buffer)
-        .jpeg({ quality: 85 })
-        .toBuffer();
-
-      thumbnailBuffer = await sharp
-        .default(buffer)
-        .resize(400, 400, { fit: "inside", withoutEnlargement: true })
-        .jpeg({ quality: 70 })
-        .toBuffer();
-    } catch {
-      processedBuffer = buffer;
-    }
-
-    const timestamp = Date.now();
-    const safeName = file.name.replace(/\s+/g, "_").replace(/[^a-zA-Z0-9_.-]/g, "");
-    const key = `photos/${userId}/${timestamp}-${safeName}`;
-    const thumbnailKey = `photos/${userId}/${timestamp}-thumb-${safeName}`;
-
-    let storageUrl: string;
-    let thumbnailUrl: string | null = null;
-
-    try {
-      storageUrl = await uploadToStorage(key, processedBuffer, file.type || "image/jpeg");
-    } catch (err) {
-      console.error("Primary storage upload failed:", err);
-      storageUrl = `/uploads/${key}`;
-    }
-
-    if (thumbnailBuffer) {
-      try {
-        const thumbUrl = await uploadToStorage(thumbnailKey, thumbnailBuffer, "image/jpeg");
-        thumbnailUrl = thumbUrl;
-      } catch {
-        thumbnailUrl = `/uploads/${thumbnailKey}`;
-      }
-    }
+    const origKey = makeKey(userId, "image/jpeg", "orig");
+    const thumbKey = makeKey(userId, "image/jpeg", "thumb");
+    await putObject(origKey, result.jpeg, "image/jpeg");
+    await putObject(thumbKey, result.thumbnail, "image/jpeg");
 
     const photo = await prisma.photo.create({
       data: {
         userId,
         label,
         notes,
-        storageUrl,
-        thumbnailUrl,
-        width,
-        height,
-        fileSize: buffer.length,
+        storageUrl: origKey,
+        thumbnailUrl: thumbKey,
+        contentType: "image/jpeg",
+        width: result.width,
+        height: result.height,
+        fileSize: result.jpeg.length,
       },
-      select: {
-        id: true,
-        label: true,
-        notes: true,
-        capturedAt: true,
-        storageUrl: true,
-        thumbnailUrl: true,
-        width: true,
-        height: true,
-        fileSize: true,
-      },
+      select: LIST_SELECT,
     });
 
-    return NextResponse.json(photo, { status: 201 });
+    return NextResponse.json(withPhotoUrls(photo), { status: 201 });
   } catch (error) {
     console.error("POST /api/photos error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
