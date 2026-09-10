@@ -38,7 +38,15 @@ Set these in Project → Settings → Environment Variables (Production + Previe
 | `NEXT_PUBLIC_STRIPE_PRICE_ID_MONTHLY` | same as `STRIPE_PRICE_ID_MONTHLY` (read client-side on the settings page) |
 | `R2_ACCOUNT_ID` / `R2_ACCESS_KEY_ID` / `R2_SECRET_ACCESS_KEY` / `R2_BUCKET_NAME` / `R2_PUBLIC_URL` | Cloudflare R2 — **required in production**; without it the app falls back to writing photos under `public/uploads`, which does not persist on Vercel and is not private (Phase 3 replaces this path) |
 
-OAuth (`GOOGLE_*`, `APPLE_*`) are optional; credentials auth works without them.
+OAuth (`GOOGLE_*`, `APPLE_*`) are optional and only registered when both the id
+and secret are set; credentials (email + password) auth works without them.
+
+### "There is a problem with the server configuration"
+
+That page comes from NextAuth. It means `authOptions` failed to initialise —
+almost always **`NEXTAUTH_SECRET` is missing** in the environment. Set it (and
+`NEXTAUTH_URL`) for Production *and* Preview, then redeploy. Setting a
+`GOOGLE_*` / `APPLE_*` id without its matching secret triggers the same error.
 
 ## 4. First deploy
 
