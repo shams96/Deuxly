@@ -155,6 +155,18 @@ Branch: `feat/phase-2-analysis`. Depends on Phase 1 merged.
 
 Branch: `feat/phase-3-security`. Can start after Phase 1 (parallel with Phase 2 if staffed; otherwise after).
 
+**Status (2026-09-10): COMPLETE — pending review/merge. Commit `8ed3dc2`.**
+- P3.1 ✅ `rateLimit.ts` → Postgres fixed-window (`INSERT … ON CONFLICT` with a window-reset `CASE`), fails open. Applied to `POST /api/photos`, `/api/compare`, `/api/stripe/checkout`, `/api/auth/signup` (per-IP via `clientIp`), `/api/auth/delete-account`. New `RateLimit` model + index.
+- P3.2 ✅ `imageValidation.ts` — magic-byte sniff (JPEG/PNG/WebP, rejects declared MIME), 12 MB cap (Content-Length + `file.size` + buffer), 64–8000px bounds, full `sharp` re-encode to JPEG (strips EXIF/GPS and any trailing payload). Label/notes length caps.
+- P3.3 ✅ `storage.ts` rewritten — R2 or `.data/uploads` **outside `public/`**; server-generated `photos/<userId>/<uuid>-<kind>.<ext>` keys (no user filename → no traversal). New `GET /api/photos/[id]/file` streams bytes after session + ownership check; DB stores opaque keys, API responses expose only same-origin authed URLs (`withPhotoUrls`, `storageUrl` dropped from every `select`). `DELETE` removes storage objects too. `next/image` R2 `remotePatterns` removed (all same-origin now).
+- P3.4 ✅ `sw.js` v2 — never intercepts `/api/*` (no private photo/response caching), same-origin static only, `clear-cache` message handler; `lib/signOut.ts` wraps NextAuth `signOut` to purge all caches on sign-out (wired into nav, settings, Header).
+- P3.5 ✅ `next.config.ts` `headers()` — CSP (`script-src`/`connect-src` allow `cdn.jsdelivr.net` + `storage.googleapis.com` for the tfjs CDN runtime; `'unsafe-eval'`/`'unsafe-inline'` still required by tfjs + Next bootstrap — **flagged to tighten** once CV is bundled/SRI-pinned), `X-Content-Type-Options`, `X-Frame-Options: DENY`, `Referrer-Policy`, `Permissions-Policy` (`camera=self`), HSTS.
+- P3.6 ✅ Stripe webhook — `WebhookEvent` table claims `event.id` first (duplicates acked without reprocessing); `invoice.payment_failed` → downgrade.
+- P3.7 ✅ Two-step account deletion — `POST` issues a 15-min `AccountDeletionToken`; `DELETE` requires the token **plus the account email typed back**; wipes all photo storage objects before the cascade. Settings page updated (`window.prompt` for email).
+- P3.8 ✅ Security review of the branch diff — **no HIGH/MEDIUM findings**; PR is a net security gain. Noted (out of scope): CSP `unsafe-*`, XFF-spoofable rate-limit bucket, webhook `catch`-all swallows transient errors.
+- Migration `20260910130000_phase3_security` applied to local Postgres; `prisma migrate status` clean, no drift. Schema: `photos.content_type`, `RateLimit`, `WebhookEvent`, `AccountDeletionToken`.
+- Gate: `next build` ✅ · `tsc --noEmit` ✅ · `eslint` ✅ (5 pre-existing warnings) · `vitest` 40/40 ✅ · `playwright` 12/12 ✅ (incl. cross-user 404, anon 401, non-image 415).
+
 ### P3.1 Durable rate limiting  → (none)
 
 - Replace in-memory `Map` in `src/lib/rateLimit.ts`. Options: Postgres table (`rate_limit_hits`, we already have PG) or Upstash Redis. Recommend a small PG-backed fixed-window to avoid new infra.
