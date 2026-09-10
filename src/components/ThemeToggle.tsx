@@ -1,6 +1,7 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
+import { Monitor, Sun, Moon } from "lucide-react";
 
 type Theme = "light" | "dark" | "system";
 
@@ -36,7 +37,7 @@ function subscribe(cb: () => void) {
 }
 
 const NEXT: Record<Theme, Theme> = { system: "light", light: "dark", dark: "system" };
-const ICON: Record<Theme, string> = { system: "🖥", light: "☀", dark: "☾" };
+const ICON = { system: Monitor, light: Sun, dark: Moon } as const;
 const LABEL: Record<Theme, string> = {
   system: "Theme: system",
   light: "Theme: light",
@@ -45,6 +46,7 @@ const LABEL: Record<Theme, string> = {
 
 export default function ThemeToggle({ className = "" }: { className?: string }) {
   const theme = useSyncExternalStore(subscribe, currentTheme, () => "system" as Theme);
+  const Icon = ICON[theme];
 
   return (
     <button
@@ -54,9 +56,7 @@ export default function ThemeToggle({ className = "" }: { className?: string }) 
       title={LABEL[theme]}
       className={`flex h-9 w-9 items-center justify-center rounded-full border border-line text-ink-2 transition-colors hover:bg-surface-2 hover:text-ink ${className}`}
     >
-      <span aria-hidden className="text-sm">
-        {ICON[theme]}
-      </span>
+      <Icon size={16} aria-hidden />
     </button>
   );
 }

@@ -1,6 +1,15 @@
 "use client";
 
 import React from "react";
+import { Check, Circle } from "lucide-react";
+
+function Mark({ ok }: { ok: boolean }) {
+  return ok ? (
+    <Check size={16} className="shrink-0" aria-hidden />
+  ) : (
+    <Circle size={16} className="shrink-0" aria-hidden />
+  );
+}
 
 interface FaceGuideProps {
   faceSize: number;
@@ -48,23 +57,23 @@ export default function FaceGuide({ faceSize, isAligned, isGazing, isNeutral }: 
 
       <div className="absolute bottom-28 left-4 right-4 space-y-2">
         <div className={`flex items-center gap-2.5 text-sm ${faceSize > 0 && faceSize < 300 ? "text-success-ink" : "text-ink-3"}`}>
-          <span className="text-base">{faceSize > 0 && faceSize < 300 ? "✓" : "○"}</span>
+          <Mark ok={faceSize > 0 && faceSize < 300} />
           <span>Face detected</span>
         </div>
         <div className={`flex items-center gap-2.5 text-sm ${isAligned ? "text-success-ink" : "text-ink-3"}`}>
-          <span className="text-base">{isAligned ? "✓" : "○"}</span>
+          <Mark ok={isAligned} />
           <span>Centered & level</span>
         </div>
         <div className={`flex items-center gap-2.5 text-sm ${distanceColor}`}>
-          <span className="text-base">{distanceText === "Good distance" ? "✓" : "○"}</span>
+          <Mark ok={distanceText === "Good distance"} />
           <span>{distanceText}</span>
         </div>
         <div className={`flex items-center gap-2.5 text-sm ${isGazing ? "text-success-ink" : "text-ink-3"}`}>
-          <span className="text-base">{isGazing ? "✓" : "○"}</span>
+          <Mark ok={isGazing} />
           <span>Looking at camera</span>
         </div>
         <div className={`flex items-center gap-2.5 text-sm ${isNeutral ? "text-success-ink" : "text-ink-3"}`}>
-          <span className="text-base">{isNeutral ? "✓" : "○"}</span>
+          <Mark ok={isNeutral} />
           <span>Neutral expression</span>
         </div>
       </div>

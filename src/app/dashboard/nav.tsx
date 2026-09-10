@@ -4,15 +4,25 @@ import { signOut } from "@/lib/signOut";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import {
+  LayoutGrid,
+  Camera,
+  Images,
+  GitCompareArrows,
+  Sparkles,
+  Settings,
+  Menu,
+  LogOut,
+} from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
 
 const navItems = [
-  { href: "/dashboard", label: "Timeline", icon: "timeline" },
-  { href: "/dashboard/capture", label: "Capture", icon: "capture" },
-  { href: "/dashboard/history", label: "History", icon: "history" },
-  { href: "/dashboard/compare", label: "Compare", icon: "compare" },
-  { href: "/dashboard/analyses", label: "Analyses", icon: "analyses" },
-  { href: "/dashboard/settings", label: "Settings", icon: "settings" },
+  { href: "/dashboard", label: "Timeline", Icon: LayoutGrid },
+  { href: "/dashboard/capture", label: "Capture", Icon: Camera },
+  { href: "/dashboard/history", label: "History", Icon: Images },
+  { href: "/dashboard/compare", label: "Compare", Icon: GitCompareArrows },
+  { href: "/dashboard/analyses", label: "Analyses", Icon: Sparkles },
+  { href: "/dashboard/settings", label: "Settings", Icon: Settings },
 ];
 
 export default function DashboardNav({ user }: { user: { name?: string | null; email?: string | null; image?: string | null; subscriptionStatus?: string } }) {
@@ -49,6 +59,7 @@ export default function DashboardNav({ user }: { user: { name?: string | null; e
                   : "text-ink-2 hover:bg-surface-2 hover:text-ink"
               }`}
             >
+              <item.Icon size={18} aria-hidden />
               {item.label}
             </Link>
           ))}
@@ -59,6 +70,7 @@ export default function DashboardNav({ user }: { user: { name?: string | null; e
             onClick={() => signOut({ callbackUrl: "/login" })}
             className="flex-1 flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-ink-2 hover:bg-surface-2 hover:text-ink transition-colors"
           >
+            <LogOut size={18} aria-hidden />
             Sign out
           </button>
           <ThemeToggle />
@@ -78,9 +90,7 @@ export default function DashboardNav({ user }: { user: { name?: string | null; e
               aria-expanded={showMenu}
               className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-2 transition-colors"
             >
-              <svg className="w-5 h-5 text-ink" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
+              <Menu size={20} className="text-ink" aria-hidden />
             </button>
 
             {showMenu && (
@@ -104,12 +114,13 @@ export default function DashboardNav({ user }: { user: { name?: string | null; e
                       href={item.href}
                       onClick={() => setShowMenu(false)}
                       aria-current={isActive(item.href) ? "page" : undefined}
-                      className={`block px-4 py-3 text-sm transition-colors ${
+                      className={`flex items-center gap-2.5 px-4 py-3 text-sm transition-colors ${
                         isActive(item.href)
                           ? "text-ink font-medium bg-surface-2"
                           : "text-ink-2"
                       }`}
                     >
+                      <item.Icon size={16} aria-hidden />
                       {item.label}
                     </Link>
                   ))}
@@ -137,12 +148,13 @@ export default function DashboardNav({ user }: { user: { name?: string | null; e
               key={item.href}
               href={item.href}
               aria-current={isActive(item.href) ? "page" : undefined}
-              className={`flex flex-col items-center justify-center py-2 px-3 min-h-[60px] min-w-[60px] transition-colors ${
+              className={`flex flex-col items-center justify-center gap-1 py-2 px-3 min-h-[60px] min-w-[60px] text-[11px] font-medium transition-colors ${
                 isActive(item.href)
                   ? "text-ink"
                   : "text-ink-3"
               }`}
             >
+              <item.Icon size={20} aria-hidden />
               {item.label}
             </Link>
           ))}

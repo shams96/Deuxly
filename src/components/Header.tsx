@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
+import { Menu, X } from "lucide-react";
 import { signOut } from "@/lib/signOut";
 import { Button } from "@/components/ui/Button";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -73,36 +74,9 @@ export function Header() {
             className="md:hidden p-2 text-ink"
             onClick={() => setIsOpen(!isOpen)}
             aria-label="Toggle menu"
+            aria-expanded={isOpen}
           >
-            {isOpen ? (
-              <svg
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            ) : (
-              <svg
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
-              </svg>
-            )}
+            {isOpen ? <X size={24} aria-hidden /> : <Menu size={24} aria-hidden />}
           </button>
         </div>
       </div>
@@ -116,7 +90,7 @@ export function Header() {
                 href={link.href}
                 className={`block px-3 py-2 rounded-md text-base font-medium ${
                   pathname === link.href
-                    ? "text-on-fill bg-accent-soft"
+                    ? "text-ink bg-accent-soft"
                     : "text-ink-2 hover:text-ink"
                 }`}
                 onClick={() => setIsOpen(false)}

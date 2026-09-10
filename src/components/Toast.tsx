@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, useCallback, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { X } from "lucide-react";
 
 type Toast = {
   id: string;
@@ -79,9 +80,9 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
                 <button
                   onClick={() => removeToast(toast.id)}
                   aria-label="Dismiss"
-                  className="text-current opacity-60 hover:opacity-100"
+                  className="shrink-0 opacity-60 hover:opacity-100"
                 >
-                  <span aria-hidden>✕</span>
+                  <X size={16} aria-hidden />
                 </button>
               </div>
             </motion.div>

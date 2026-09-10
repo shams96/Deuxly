@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { X } from "lucide-react";
 
 type Photo = {
   id: string;
@@ -156,9 +157,9 @@ export default function PhotoModal({ photoId, onClose, onUpdated, onDeleted }: P
                 <button
                   onClick={onClose}
                   aria-label="Close"
-                  className="flex h-8 w-8 items-center justify-center rounded-full text-ink-2 hover:bg-surface-2"
+                  className="flex h-8 w-8 items-center justify-center rounded-full text-ink-2 hover:bg-surface-2 hover:text-ink"
                 >
-                  <span aria-hidden>✕</span>
+                  <X size={18} aria-hidden />
                 </button>
               </div>
 

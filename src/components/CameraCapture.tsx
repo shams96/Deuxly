@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import Image from "next/image";
+import { Check, Circle, CheckCircle2 } from "lucide-react";
 import { useToast } from "@/components/Toast";
 
 type QualityCondition = {
@@ -361,7 +362,7 @@ export default function CameraCapture({ onCapture }: Props) {
 
         <div className="p-4 rounded-xl bg-success/10 border border-success/20">
           <div className="flex items-center gap-2 mb-2">
-            <span className="text-success-ink text-lg">✓</span>
+            <CheckCircle2 size={18} className="text-success-ink" aria-hidden />
             <span className="text-sm font-medium text-ink">Photo captured!</span>
           </div>
           <p className="text-xs text-ink-2">Review your photo above. If it looks good, add details and save. Otherwise, retake it.</p>
@@ -581,10 +582,14 @@ export default function CameraCapture({ onCapture }: Props) {
           <div
             key={c.label}
             className={`flex items-center gap-2 p-2 rounded-lg text-xs ${
-              c.met ? "bg-success/10 text-success-ink" : "bg-surface-2 text-on-fill-2"
+              c.met ? "bg-success/10 text-success-ink" : "bg-surface-2 text-ink-2"
             }`}
           >
-            <span>{c.met ? "✓" : "○"}</span>
+            {c.met ? (
+              <Check size={14} className="shrink-0" aria-hidden />
+            ) : (
+              <Circle size={14} className="shrink-0" aria-hidden />
+            )}
             <span>{c.label}</span>
           </div>
         ))}

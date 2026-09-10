@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
+import { Check } from "lucide-react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/Button";
@@ -185,9 +186,11 @@ export default function Home() {
                           key={f}
                           className="flex items-start gap-2 text-sm text-ink-2"
                         >
-                          <span aria-hidden className="mt-0.5 text-success-ink">
-                            ✓
-                          </span>
+                          <Check
+                            size={16}
+                            className="mt-0.5 shrink-0 text-success-ink"
+                            aria-hidden
+                          />
                           {f}
                         </li>
                       ))}

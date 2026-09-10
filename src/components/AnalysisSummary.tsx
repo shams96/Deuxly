@@ -1,5 +1,12 @@
 "use client";
 
+import {
+  TrendingUp,
+  TrendingDown,
+  Minus,
+  ArrowLeft,
+  ArrowRight,
+} from "lucide-react";
 import { AnalysisZone, AnalysisResult } from "@/types";
 
 type Props = {
@@ -21,7 +28,11 @@ const COLOR = {
   worsened: "var(--color-danger)",
 } as const;
 
-const GLYPH = { improved: "▲", neutral: "—", worsened: "▼" } as const;
+const GLYPH = {
+  improved: TrendingUp,
+  neutral: Minus,
+  worsened: TrendingDown,
+} as const;
 const WORD = { improved: "Improved", neutral: "Neutral", worsened: "Worsened" } as const;
 
 /**
@@ -38,6 +49,7 @@ function ZoneRow({
   const half = 50; // percent, each side of centre
   const magnitude = change === "neutral" ? 6 : 10 + confidence * (half - 12);
   const color = COLOR[change];
+  const Glyph = GLYPH[change];
 
   return (
     <div className="py-2.5">
@@ -45,8 +57,9 @@ function ZoneRow({
         <span className="text-sm font-medium text-ink">
           {ZONE_LABELS[name]}
         </span>
-        <span className="text-xs text-ink-2">
-          <span style={{ color }}>{GLYPH[change]}</span> {WORD[change]}
+        <span className="inline-flex items-center gap-1 text-xs text-ink-2">
+          <Glyph size={13} style={{ color }} aria-hidden />
+          {WORD[change]}
           <span className="text-ink-3"> · {Math.round(confidence * 100)}%</span>
         </span>
       </div>
@@ -82,12 +95,14 @@ export default function AnalysisSummary({ analysis }: Props) {
           {analysis.zones.map((z) => (
             <ZoneRow key={z.name} {...z} />
           ))}
-          <div className="flex items-center gap-4 pt-3 text-xs text-ink-3">
-            <span>
-              <span style={{ color: COLOR.worsened }}>◀</span> regressed
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 pt-3 text-xs text-ink-3">
+            <span className="inline-flex items-center gap-1">
+              <ArrowLeft size={12} style={{ color: COLOR.worsened }} aria-hidden />
+              regressed
             </span>
-            <span>
-              <span style={{ color: COLOR.improved }}>▶</span> improved
+            <span className="inline-flex items-center gap-1">
+              <ArrowRight size={12} style={{ color: COLOR.improved }} aria-hidden />
+              improved
             </span>
             <span>bar length = confidence</span>
           </div>

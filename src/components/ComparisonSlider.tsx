@@ -61,7 +61,7 @@ export default function ComparisonSlider({
             className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
               mode === "slider"
                 ? "bg-ink text-bg"
-                : "bg-bg text-on-fill hover:bg-accent-soft"
+                : "bg-bg text-ink hover:bg-accent-soft"
             }`}
           >
             Slider
@@ -72,7 +72,7 @@ export default function ComparisonSlider({
             className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
               mode === "side-by-side"
                 ? "bg-ink text-bg"
-                : "bg-bg text-on-fill hover:bg-accent-soft"
+                : "bg-bg text-ink hover:bg-accent-soft"
             }`}
           >
             Side by side
